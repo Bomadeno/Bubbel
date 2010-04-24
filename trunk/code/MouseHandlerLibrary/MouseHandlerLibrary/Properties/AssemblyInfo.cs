@@ -8,8 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MouseHandlerLibrary")]
 [assembly: AssemblyProduct("MouseHandlerLibrary")]
 [assembly: AssemblyDescription("")]
-[assembly: AssemblyCompany("Univerity of Birmingham")]
-[assembly: AssemblyCopyright("Copyright © Univerity of Birmingham 2009")]
+[assembly: AssemblyCompany("BomaCorp")]
+[assembly: AssemblyCopyright("Copyright © Matt Bond 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
