@@ -65,10 +65,6 @@
     <XnaCompressContent>true</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MattsMenuLibrary, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\MattsMenuLibrary\MattsMenuLibrary\bin\x86\Release\MattsMenuLibrary.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Xna.Framework, Version=3.0.0.0, Culture=neutral, PublicKeyToken=6d5c3888ef60e27d, processorArchitecture=x86">
       <Private>False</Private>
       <SpecificVersion>True</SpecificVersion>
@@ -168,6 +164,10 @@
     <ProjectReference Include="..\..\MattsButtonLibrary\MattsButtonLibrary\MattsButtonLibrary.csproj">
       <Project>{21EBDC16-E486-40FE-A4F3-F34E363EDFF1}</Project>
       <Name>MattsButtonLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MattsMenuLibrary\MattsMenuLibrary\MattsMenuLibrary.csproj">
+      <Project>{940E48AD-EE73-44E6-9CC8-9F22ADE9983D}</Project>
+      <Name>MattsMenuLibrary</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MouseHandlerLibrary\MouseHandlerLibrary\MouseHandlerLibrary.csproj">
       <Project>{4AA386E1-86E7-4AF6-A200-C3754B025866}</Project>
