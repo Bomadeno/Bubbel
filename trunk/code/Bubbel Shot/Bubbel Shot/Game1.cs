@@ -425,7 +425,7 @@ namespace Bubbel_Shot
 
             //set up cannon
             cannonData = new CannonData();
-            cannonData.currentBall = availableColours[random.Next(availableColours.Count)];
+            cannonData.currentBallColor = availableColours[random.Next(availableColours.Count)];
 
 
             cannonData.nextFiveShots = new List<Color>();
@@ -483,7 +483,7 @@ namespace Bubbel_Shot
             //start shot from cannon centre
             shotLocation = cannonFulcrum;
             //set colour of current ball to that of the cannon
-            shotColor = cannonData.currentBall;
+            shotColor = cannonData.currentBallColor;
             soundBank.PlayCue("cannon");
 
             //load next shot into cannon
@@ -498,7 +498,7 @@ namespace Bubbel_Shot
         /// </summary>
         private void LoadNextShot()
         {
-            cannonData.currentBall = cannonData.nextFiveShots[0];
+            cannonData.currentBallColor = cannonData.nextFiveShots[0];
             cannonData.nextFiveShots.RemoveAt(0);
             cannonData.nextFiveShots.Add(availableColours[random.Next(availableColours.Count)]);
         }
@@ -1154,7 +1154,7 @@ namespace Bubbel_Shot
             }
 
             //if currently loaded shot is removed colour load next shot into cannon
-            if (cannonData.currentBall == color)
+            if (cannonData.currentBallColor == color)
                 LoadNextShot();
         }
 
@@ -1326,7 +1326,7 @@ namespace Bubbel_Shot
         private void DrawCannon()
         {
             spriteBatch.Draw(cannonBodyBack, cannonFulcrum, null, Color.White, cannonData.Angle, cannonBodyOrigin, 1, SpriteEffects.None, 0.5f);
-            spriteBatch.Draw(bubbelTexture, cannonFulcrum, null, cannonData.currentBall, cannonData.currentBallRotation, bubbelOrigin, 1, SpriteEffects.None, 0.4f);
+            spriteBatch.Draw(bubbelTexture, cannonFulcrum, null, cannonData.currentBallColor, cannonData.currentBallRotation, bubbelOrigin, 1, SpriteEffects.None, 0.4f);
             spriteBatch.Draw(cannonBodyFore, cannonFulcrum, null, Color.Wheat, cannonData.Angle, cannonBodyOrigin, 1, SpriteEffects.None, 0.1f);
             spriteBatch.Draw(cannonFrame, cannonFulcrum, null, Color.White, 0, cannonFrameOrigin, 1, SpriteEffects.None, 0.6f);
         }
