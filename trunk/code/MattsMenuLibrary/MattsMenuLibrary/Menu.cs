@@ -150,9 +150,9 @@ namespace MattsMenuLibrary
 
         public override void Initialize()
         {
-            this.presentationParameters = GraphicsDevice.PresentationParameters;
 
             base.Initialize();
+            this.presentationParameters = GraphicsDevice.PresentationParameters;
         }
 
         #endregion
