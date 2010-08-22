@@ -22,6 +22,13 @@ namespace Bubbel_Shot
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        #region Constants
+
+        //default width, default height
+        private const int DEFAULT_WIDTH = 800;
+        private const int DEFAULT_HEIGHT = 600;
+
+        #endregion
 
         #region Variables
 
@@ -29,7 +36,7 @@ namespace Bubbel_Shot
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         int screenWidth, screenHeight;
-        Vector2 baseScreenSize = new Vector2(800, 600);
+        Vector2 baseScreenSize = new Vector2(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         Random random = new Random();
 
         //Playing field layout
@@ -61,6 +68,8 @@ namespace Bubbel_Shot
         Texture2D backgroundTexture;
         Texture2D foregroundTexture;
         //TODO add foreground origins, drawing locations as calculated for playing field here
+        Vector2 leftAnchor = new Vector2(0, 0);
+        Vector2 rightAnchor = new Vector2(0, 0);
 
         Texture2D cannonFrame;
         Texture2D cannonBodyFore;
@@ -272,8 +281,8 @@ namespace Bubbel_Shot
         protected override void Initialize()
         {
             // Set display parameters
-            graphics.PreferredBackBufferWidth = 800;
-            graphics.PreferredBackBufferHeight = 600;
+            graphics.PreferredBackBufferWidth = DEFAULT_WIDTH;
+            graphics.PreferredBackBufferHeight = DEFAULT_HEIGHT;
             graphics.IsFullScreen = false;
             graphics.ApplyChanges();
 
@@ -1277,11 +1286,11 @@ namespace Bubbel_Shot
             spriteBatch.Draw(backgroundTexture, screenRectangle, Color.White);
 
             //draw left side
-            spriteBatch.Draw(foregroundTexture, new Vector2(0, 0), new Rectangle(0, 0, foregroundTexture.Width / 2, foregroundTexture.Height), Color.White);
+            spriteBatch.Draw(foregroundTexture, leftAnchor, new Rectangle(0, 0, foregroundTexture.Width / 2, foregroundTexture.Height), Color.White);
             //draw right side
             spriteBatch.Draw(foregroundTexture, new Vector2(foregroundTexture.Width / 2, 0), new Rectangle(foregroundTexture.Width / 2, 0, foregroundTexture.Width / 2, foregroundTexture.Height), Color.White);
 
-            spriteBatch.Draw(currentModePanel, new Rectangle(25, 100, 150, 220), Color.White);
+            spriteBatch.Draw(currentModePanel, new Rectangle((int)leftAnchor.X+20, 100, 150, 220), Color.White);
         }
 
         private void DrawBallField()

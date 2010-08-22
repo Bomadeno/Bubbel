@@ -22,13 +22,12 @@ namespace Bubbel_Shot
         public float orientation;
         public int particleScore;
         private const float terminalVelocity = 15;
-        private Random random;
+        //todo add randomness to drop
 
         public FallingParticle(Vector2 location, Color color)
         {
             this.location = location;
             this.speed = new Vector2(0, 0);
-            random = new Random();
 
             //'black out' colour
             Vector3 col = color.ToVector3();
