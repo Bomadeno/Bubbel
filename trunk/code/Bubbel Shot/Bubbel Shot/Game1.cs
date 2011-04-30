@@ -579,14 +579,10 @@ namespace Bubbel_Shot
             if (j >= playingField.GetLength(0))
                 j = playingField.GetLength(0) - 1;
 
-            bool shotPlaced = false;
-
-
             if (playingField[j, i] == Color.TransparentBlack)
             {
                 playingField[j, i] = shotColor;
                 justAddedBubbel = new Point(j, i);
-                shotPlaced = true;
             }
             else
             {
@@ -1290,7 +1286,7 @@ namespace Bubbel_Shot
             //draw right side
             spriteBatch.Draw(foregroundTexture, new Vector2(foregroundTexture.Width / 2, 0), new Rectangle(foregroundTexture.Width / 2, 0, foregroundTexture.Width / 2, foregroundTexture.Height), Color.White);
 
-            spriteBatch.Draw(currentModePanel, new Rectangle((int)leftAnchor.X+20, 100, 150, 220), Color.White);
+            //spriteBatch.Draw(currentModePanel, new Rectangle((int)leftAnchor.X+20, 100, 150, 220), Color.White);
         }
 
         private void DrawBallField()
@@ -1359,7 +1355,7 @@ namespace Bubbel_Shot
 
         private void DrawScore()
         {
-            spriteBatch.DrawString(scoreFont, "Score: " + score.currentScore, new Vector2(30, 15), Color.Fuchsia);
+            spriteBatch.DrawString(scoreFont, "Score: " + score.currentScore, new Vector2(45, 15), Color.Maroon);
         }
 
 
