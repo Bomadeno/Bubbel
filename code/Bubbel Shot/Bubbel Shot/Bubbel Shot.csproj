@@ -15,8 +15,8 @@
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>70F8AA8181AC2B311FE3915A94B7ECD3B945934F</ManifestCertificateThumbprint>
-    <ManifestKeyFile>Bubbel Shot_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>8C9A6D8B66968192EFAF142724CD7D8AB35CF626</ManifestCertificateThumbprint>
+    <ManifestKeyFile>Bubbel Shot_1_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
@@ -153,7 +153,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Bubbel Shot_TemporaryKey.pfx" />
+    <None Include="Bubbel Shot_1_TemporaryKey.pfx" />
     <None Include="Properties\app.manifest" />
   </ItemGroup>
   <ItemGroup>
