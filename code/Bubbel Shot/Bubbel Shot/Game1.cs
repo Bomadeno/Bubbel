@@ -78,11 +78,13 @@ namespace Bubbel_Shot
         Texture2D cursorTexture;
         Texture2D currentModePanel;
         Texture2D mainMenuButtonTexture;
+        Texture2D feedTexture;
         SpriteFont scoreFont;
 
         //the point on the screen which the cannon spins around
         private Vector2 cannonFulcrum = new Vector2(400, 525);
 
+        private Vector2 zeroOrigin = new Vector2(0, 0);
         private Vector2 cannonFrameOrigin = new Vector2(86, 82);
         private Vector2 cannonBodyOrigin = new Vector2(28, 90);
         private Vector2 bubbelOrigin = new Vector2(18, 18);
@@ -111,6 +113,7 @@ namespace Bubbel_Shot
         bool bubbelsPopping = false;
         bool bubbelsFalling = false;
         bool needToCheckColours = false;
+        bool shotReloading = false;
 
         //score
         Score score;
@@ -121,6 +124,7 @@ namespace Bubbel_Shot
         float shotSpeed = 6.5f;
         Color shotColor;
         Point justAddedBubbel;
+        int shotReloadingStage=0;
 
         //bubbels popping and dropping
         FallingBubbels fallingBubbels;
@@ -645,6 +649,7 @@ namespace Bubbel_Shot
 
             mainMenuButtonTexture = Content.Load<Texture2D>("MenuButton");
 
+            feedTexture = Content.Load<Texture2D>("Feed");
 
             //Set menu items
             newPauseMenu.AddMenuItem(new MenuButton("Resume", pauseMenuResumeButton, new Rectangle(330, 250, 140, 50), ResumeGame));
@@ -728,6 +733,7 @@ namespace Bubbel_Shot
 
         /// <summary>
         /// Processes the keyboard for user input
+        /// Allows the user to control the cannon using left and right keys and space to fire
         /// </summary>
         private void ProcessKeyboard()
         {
@@ -750,6 +756,10 @@ namespace Bubbel_Shot
             }
         }
 
+        /// <summary>
+        /// when shot is fired, update shot updates the shot's location,
+        /// bouncing it off walls and checking for collisions with the ball field
+        /// </summary>
         private void UpdateShot()
         {
             if (shotFired)
@@ -777,7 +787,7 @@ namespace Bubbel_Shot
 
 
         /// <summary>
-        /// Called after a shot lands, calculates popping and falling
+        /// Does work after a shot lands, calculates popping and falling
         /// bubbels
         /// </summary>
         private void PostShotLandingProcessing()
@@ -814,6 +824,10 @@ namespace Bubbel_Shot
             }
         }
 
+        /// <summary>
+        /// Finds popping bubbels, if a sufficiently large chain is made, bubbels are added 
+        /// to the popping list and removed from the playing field
+        /// </summary>
         private void EvaluatePoppingBubbels()
         {
             //build up the list of 'popping bubbles' - neighbours of the same colour
@@ -852,12 +866,14 @@ namespace Bubbel_Shot
                     playingField[p.X, p.Y] = Color.TransparentBlack;
                 }
 
-
                 //make it so the popping is started
                 bubbelsPopping = true;
             }
         }
 
+        /// <summary>
+        /// Calculates any bubbels that will drop and adds them to the score
+        /// </summary>
         private void EvaluateFallingBubbels()
         {
             Point currentPoint;
@@ -916,7 +932,7 @@ namespace Bubbel_Shot
         }
 
         /// <summary>
-        /// Gets neightbours of the centreBubbel which are the same colour
+        /// Gets neighbours of the centreBubbel which are the same colour
         /// </summary>
         /// <param name="centreBubbel">A point representing the bubbel you 
         /// wish to find the neighbours of</param>
@@ -1030,6 +1046,10 @@ namespace Bubbel_Shot
             return neighbours;
         }
 
+        /// <summary>
+        /// Pops bubbels one by one, playing the pop sound and incrementing score.
+        /// Once bubbels all bubbels are popped move on to bubbel dropping
+        /// </summary>
         private void AnimateBubbelsPopping()
         {
             if (bubbelsPopping)
@@ -1075,7 +1095,7 @@ namespace Bubbel_Shot
         }
 
         /// <summary>
-        /// Drops any unattached bubbels until they are off the screen
+        /// Adds any unattached bubbels to falling bubbel particle engine
         /// </summary>
         private void DropBubbels()
         {
@@ -1086,7 +1106,7 @@ namespace Bubbel_Shot
                     fallingParticleEngine.AddBubbel(new FallingParticle(fallingBubbels.positions[i], fallingBubbels.color[i]));
                 }
                 fallingBubbels = new FallingBubbels();
-                //TODO
+                //TODO - doens't this work? What is left todo...
                 bubbelsFalling = false;
                 needToCheckColours = true;
                 fallingBubbels.accelerating = false;
@@ -1168,10 +1188,12 @@ namespace Bubbel_Shot
             cannonData.currentBallRotation += 0.1f;
         }
 
+        /// <summary>
+        /// Checks for game over conditions and if detected launches appropriate menu screen
+        /// </summary>
         private void TestGameOver()
         {
-            //if there's anything in the bottom row
-            //and it's not popping or falling
+            //if there's anything in the bottom row and it's not popping or falling
             //GAME OVER!
             if (!bubbelsPopping && !bubbelsPopping)
             {
@@ -1338,11 +1360,18 @@ namespace Bubbel_Shot
 
         private void DrawQueue()
         {
-            spriteBatch.Draw(bubbelTexture, new Vector2(490, 550), cannonData.nextFiveShots[0]);
-            spriteBatch.Draw(bubbelTexture, new Vector2(530, 550), cannonData.nextFiveShots[1]);
-            spriteBatch.Draw(bubbelTexture, new Vector2(570, 550), cannonData.nextFiveShots[2]);
-            spriteBatch.Draw(bubbelTexture, new Vector2(610, 550), cannonData.nextFiveShots[3]);
-            spriteBatch.Draw(bubbelTexture, new Vector2(650, 550), cannonData.nextFiveShots[4]);
+            if (shotReloading)
+            {
+            }
+            else
+            {
+                spriteBatch.Draw(feedTexture, new Vector2(586, 537), null, Color.White, 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.5f);
+                spriteBatch.Draw(bubbelTexture, new Vector2(760, 550), null, cannonData.nextFiveShots[4], 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                spriteBatch.Draw(bubbelTexture, new Vector2(720, 550), null, cannonData.nextFiveShots[3], 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                spriteBatch.Draw(bubbelTexture, new Vector2(680, 550), null, cannonData.nextFiveShots[2], 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                spriteBatch.Draw(bubbelTexture, new Vector2(640, 550), null, cannonData.nextFiveShots[1], 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                spriteBatch.Draw(bubbelTexture, new Vector2(600, 550), null, cannonData.nextFiveShots[0], 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.9f);
+            }
         }
 
         private void DrawShot()

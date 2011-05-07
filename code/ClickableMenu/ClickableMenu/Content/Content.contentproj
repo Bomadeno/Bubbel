@@ -35,7 +35,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="backgroundPixel.jpg">
+    <Compile Include="backgroundPixel.png">
       <Name>backgroundPixel</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
