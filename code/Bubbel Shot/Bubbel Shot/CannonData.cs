@@ -19,5 +19,6 @@ namespace Bubbel_Shot
         public Color currentBallColor;
         public float currentBallRotation;
         public List<Color> nextFiveShots;
+        public Vector2[] nextFiveShotLocation;
     }
 }

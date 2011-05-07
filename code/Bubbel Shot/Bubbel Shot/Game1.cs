@@ -439,6 +439,12 @@ namespace Bubbel_Shot
             //set up cannon
             cannonData = new CannonData();
             cannonData.currentBallColor = availableColours[random.Next(availableColours.Count)];
+            cannonData.nextFiveShotLocation = new Vector2[5];
+            cannonData.nextFiveShotLocation[0] = new Vector2(618, 568);
+            cannonData.nextFiveShotLocation[1] = new Vector2(658, 568);
+            cannonData.nextFiveShotLocation[2] = new Vector2(698, 568);
+            cannonData.nextFiveShotLocation[3] = new Vector2(738, 568);
+            cannonData.nextFiveShotLocation[4] = new Vector2(778, 568);
 
 
             cannonData.nextFiveShots = new List<Color>();
@@ -472,7 +478,7 @@ namespace Bubbel_Shot
 
         private void FireShotWithMouse(Vector2 mousePoint)
         {
-            if (!shotFired && !shotLanded && !bubbelsPopping && !bubbelsFalling)
+            if (!shotFired && !shotLanded && !bubbelsPopping && !bubbelsFalling && !shotReloading)
             {
                 Vector2 fulcrumToMouse = cannonFulcrum - mousePoint;
                 cannonData.Angle = -1 * (float)Math.Atan(fulcrumToMouse.X / fulcrumToMouse.Y);
@@ -511,6 +517,7 @@ namespace Bubbel_Shot
         /// </summary>
         private void LoadNextShot()
         {
+            shotReloading = true;
             cannonData.currentBallColor = cannonData.nextFiveShots[0];
             cannonData.nextFiveShots.RemoveAt(0);
             cannonData.nextFiveShots.Add(availableColours[random.Next(availableColours.Count)]);
@@ -1352,25 +1359,70 @@ namespace Bubbel_Shot
 
         private void DrawCannon()
         {
-            spriteBatch.Draw(cannonBodyBack, cannonFulcrum, null, Color.White, cannonData.Angle, cannonBodyOrigin, 1, SpriteEffects.None, 0.5f);
-            spriteBatch.Draw(bubbelTexture, cannonFulcrum, null, cannonData.currentBallColor, cannonData.currentBallRotation, bubbelOrigin, 1, SpriteEffects.None, 0.4f);
+            //Fade bubbel into cannon
+            if (shotReloading)
+            {
+                Color currentBallColorSemiTransparent = cannonData.currentBallColor;
+                currentBallColorSemiTransparent.A = (byte)((float)shotReloadingStage/100.0f * 255.0f);
+                spriteBatch.Draw(bubbelTexture, cannonFulcrum, null, currentBallColorSemiTransparent, cannonData.currentBallRotation, bubbelOrigin, (float)shotReloadingStage / 100.0f, SpriteEffects.None, 0.4f);
+            }
+            else
+            {
+                spriteBatch.Draw(bubbelTexture, cannonFulcrum, null, cannonData.currentBallColor, cannonData.currentBallRotation, bubbelOrigin, 1, SpriteEffects.None, 0.4f);
+            }
             spriteBatch.Draw(cannonBodyFore, cannonFulcrum, null, Color.Wheat, cannonData.Angle, cannonBodyOrigin, 1, SpriteEffects.None, 0.1f);
+            spriteBatch.Draw(cannonBodyBack, cannonFulcrum, null, Color.White, cannonData.Angle, cannonBodyOrigin, 1, SpriteEffects.None, 0.5f);
             spriteBatch.Draw(cannonFrame, cannonFulcrum, null, Color.White, 0, cannonFrameOrigin, 1, SpriteEffects.None, 0.6f);
         }
 
         private void DrawQueue()
         {
+
             if (shotReloading)
             {
+                float percentageDone = (float)shotReloadingStage / 100.0f;
+                //Fade out the bubbel quickly
+                if (shotReloadingStage < 25)
+                {
+                    Color currentBallColorSemiTransparent = cannonData.currentBallColor;
+                    currentBallColorSemiTransparent.A = (byte)(255 - percentageDone * 1023);
+                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[0], null, currentBallColorSemiTransparent, 0.0f, bubbelOrigin, 1.0f , SpriteEffects.None, 0.9f);
+
+                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[1], null, cannonData.nextFiveShots[0], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[2], null, cannonData.nextFiveShots[1], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[3], null, cannonData.nextFiveShots[2], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[4], null, cannonData.nextFiveShots[3], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                }
+                //Slide next bubbels along
+                else
+                {
+                    float percentageSlideDone = ((float)shotReloadingStage-25.0f) / 75.0f;
+                    //move balls 40 right
+                    Vector2 interpVec = new Vector2(40 * (1.0f-percentageSlideDone), 0);
+                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[0] + interpVec, null, cannonData.nextFiveShots[0], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[1] + interpVec, null, cannonData.nextFiveShots[1], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[2] + interpVec, null, cannonData.nextFiveShots[2], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[3] + interpVec, null, cannonData.nextFiveShots[3], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[4] + interpVec, null, cannonData.nextFiveShots[4], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                }
+                
+                //spriteBatch.Draw(feedTexture, new Vector2(586, 537), null, Color.White, 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.5f);
+
+                shotReloadingStage += 5;
+                if (shotReloadingStage > 100)
+                {
+                    shotReloading = false;
+                    shotReloadingStage = 0;
+                }
             }
             else
             {
-                spriteBatch.Draw(feedTexture, new Vector2(586, 537), null, Color.White, 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.5f);
-                spriteBatch.Draw(bubbelTexture, new Vector2(760, 550), null, cannonData.nextFiveShots[4], 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                spriteBatch.Draw(bubbelTexture, new Vector2(720, 550), null, cannonData.nextFiveShots[3], 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                spriteBatch.Draw(bubbelTexture, new Vector2(680, 550), null, cannonData.nextFiveShots[2], 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                spriteBatch.Draw(bubbelTexture, new Vector2(640, 550), null, cannonData.nextFiveShots[1], 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                spriteBatch.Draw(bubbelTexture, new Vector2(600, 550), null, cannonData.nextFiveShots[0], 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                //spriteBatch.Draw(feedTexture, new Vector2(586, 537), null, Color.White, 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.5f);
+                spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[0], null, cannonData.nextFiveShots[0], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[1], null, cannonData.nextFiveShots[1], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[2], null, cannonData.nextFiveShots[2], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[3], null, cannonData.nextFiveShots[3], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[4], null, cannonData.nextFiveShots[4], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
             }
         }
 
