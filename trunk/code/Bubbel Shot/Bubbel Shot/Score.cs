@@ -6,25 +6,41 @@ namespace Bubbel_Shot
 {
     public class Score
     {
-        public const int baseScorePerPop = 10;
-        public const int baseScorePerDrop = 12;
-        public const int missedShotsAllowed = 3;
+        public const int BASE_SCORE_PER_POP = 10;
+        public const int BASE_SCORE_PER_DROP = 12;
 
-        public long currentScore;
-        public int multiplier; //increases based on shots fired and 
-        public int comboChain; //number of pops in a row
+        public long currentBoardScore;
+        public long currentTotalScore;
+        public int multiplier; //increases based on shots fired 
         public int numberOfShotsFired;
-        public int numberPopped;
-        public int totalPopped;
+        public int numberPoppedInARow;
         public int numberDropped;
-        public int totalDropped;
 
-        public int shotsUntilFieldDrops;
+        public int shotsMissed;
 
         public Score()
         {
-            shotsUntilFieldDrops = 4;
-            comboChain = 1;
+            shotsMissed = 0;
+        }
+
+        public void Miss()
+        {
+            multiplier = 1;
+            numberPoppedInARow = 0;
+        }
+
+        public void Hit()
+        {
+            multiplier++;
+        }
+
+        public int Pop()
+        {
+            numberPoppedInARow++;
+            int scoreForThisBubbel = Score.BASE_SCORE_PER_POP * numberPoppedInARow * multiplier;
+            currentTotalScore += scoreForThisBubbel;
+
+            return scoreForThisBubbel;
         }
     }
 }

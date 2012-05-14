@@ -21,6 +21,7 @@
     <SignManifests>true</SignManifests>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
     <TargetZone>LocalIntranet</TargetZone>
+    <ManifestTimestampUrl>http://timestamp.verisign.com/scripts/timstamp.dll</ManifestTimestampUrl>
     <PublishUrl>http://bomadeno.com/bubbel/download/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
@@ -33,12 +34,11 @@
     <MapFileExtensions>true</MapFileExtensions>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>16</ApplicationRevision>
+    <ApplicationRevision>17</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <ManifestTimestampUrl>http://timestamp.verisign.com/scripts/timstamp.dll</ManifestTimestampUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -97,8 +97,10 @@
     <Compile Include="BubbelException.cs" />
     <Compile Include="BubbelLibraryMethods.cs" />
     <Compile Include="CannonData.cs" />
+    <Compile Include="DifficultySettings.cs" />
     <Compile Include="FallingBubbels.cs" />
     <Compile Include="FallingParticleEngine.cs" />
+    <Compile Include="GameScreen.cs" />
     <Compile Include="PoppingBubbels.cs" />
     <Compile Include="PoppingParticleEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
