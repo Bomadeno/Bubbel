@@ -19,7 +19,9 @@ namespace ClickableMenu
     public delegate void ClickableMenuAction();
 
 
-
+    /// <summary>
+    /// Represents a background image/color/transparency. All parts are optional.
+    /// </summary>
     public struct CBackground
     {
         public Texture2D Image;
@@ -308,6 +310,21 @@ namespace ClickableMenu
             base.Update(gameTime);
         }
 
+
+        /// 
+        /// Todo (bomadeno) - Add a more general hotkey addeer, allow a keysignature/action/ Rename to Processhotkeys.
+        /// Iterate over hotkeys.
+
+        /// <summary>
+        /// Checks for menu hotkey (set by user) What is done when the hotkey is detected is up to the
+        /// user. It is the uders responsibility to show the menu as well! (for flexibility, a game 
+        /// may not want to show a menu under all conditions)
+        /// 
+        /// When checking for the menu hotkey, the menu ignores a held key, but does accept
+        /// a rapid double press.
+        /// 
+        /// Default behaviour: Escape is hotkey, pressing it shows/hides menu
+        /// </summary>
         private void ProcessMenuHotkey()
         {
             KeyboardState kbState = Keyboard.GetState();
@@ -336,7 +353,7 @@ namespace ClickableMenu
                     }
                 }
             }
-            else if (kbState.IsKeyUp(Keys.Escape))
+            else if (kbState.IsKeyUp(menuHotkey))
             {
                 ignoreMenuHotkey = 0;
             }

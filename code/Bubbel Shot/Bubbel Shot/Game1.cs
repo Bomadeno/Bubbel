@@ -51,15 +51,14 @@ namespace Bubbel_Shot
 
 
         //Game setup variables
-        int initialRowCount = 5;
         private const int topInitiallyAlignedRight = 1;
         private const float percentBlank = 0.1f;
 
         //the menus
-        GameMenu mainMenu; 
-        //GameMenu pauseMenu; //PMM
-        ButtonMenu newPauseMenu;
-        GameMenu gameOverMenu;
+        GameMenu mainMenu;
+        ButtonMenu pauseMenu;
+        ButtonMenu nextLevelMenu;
+        ButtonMenu gameOverMenu;
 
         //The various textures and fonts
         Texture2D pauseMenuImage;
@@ -79,6 +78,9 @@ namespace Bubbel_Shot
         Texture2D currentModePanel;
         Texture2D mainMenuButtonTexture;
         Texture2D feedTexture;
+        Texture2D restartButtonTexture;
+        Texture2D gameoverFailTexture;
+        Texture2D gameoverSuccessTexture;
         SpriteFont scoreFont;
 
         //the point on the screen which the cannon spins around
@@ -118,6 +120,9 @@ namespace Bubbel_Shot
         //score
         Score score;
 
+        //Difficulty settings
+        int missedShotsAllowed;
+
         //Shot data
         Vector2 shotDirection;
         Vector2 shotLocation;
@@ -156,9 +161,11 @@ namespace Bubbel_Shot
             CreateInGameMouse();
             //Create menus
             //CreatePauseMenu(); //PMM
-            CreateNewPauseMenu();
+            CreatePauseMenu();
             CreateMainMenu();
             CreateGameOverMenu();
+            //CreateNextLevelMenu();
+            //CreateGameFinishedMenu();
             CreateMenuMouse();
             this.Deactivated += new EventHandler(Game1_Deactivated);
 
@@ -214,52 +221,40 @@ namespace Bubbel_Shot
             Components.Add(mainMenu);
         }
 
-        //private void CreatePauseMenu() //PMM
-        //{
-        //    //create pause menu
-        //    pauseMenu = new GameMenu(this, "Bubbel - Paused");
-        //    //Set menu items
-        //    pauseMenu.AddMenuItem("Resume", ResumeGame);
-        //    pauseMenu.AddMenuItem("Exit", ExitGame);
-
-        //    //Set background
-        //    pauseMenu.SetBackground(null, 210, Color.White);
-
-        //    //Set pause and resume methods
-        //    pauseMenu.SetPauseMethod(PauseGame);
-        //    pauseMenu.SetResumeMethod(ResumeGame);
-        //    pauseMenu.SetMenuHotkey(Keys.Escape);
-
-        //    //Add menu to the game's components
-        //    Components.Add(pauseMenu);
-        //}
-
-        private void CreateNewPauseMenu()
+        private void CreatePauseMenu()
         {
-            //create pause menu
-            newPauseMenu = new ButtonMenu(this);
+            pauseMenu = new ButtonMenu(this);
             
             //Set pause and resume methods
-            newPauseMenu.SetPauseMethod(PauseGame);
-            newPauseMenu.SetResumeMethod(ResumeGame);
-            newPauseMenu.SetMenuHotkey(Keys.Escape);
+            pauseMenu.SetPauseMethod(PauseGame);
+            pauseMenu.SetResumeMethod(ResumeGame);
+            pauseMenu.SetMenuHotkey(Keys.Escape);
 
             //Add menu to the game's components
-            Components.Add(newPauseMenu);
+            Components.Add(pauseMenu);
 
             //The buttons and menu texture are set after they are loaded in the load method.
         }
 
         private void CreateGameOverMenu()
         {
-            gameOverMenu = new GameMenu(this, "Game Over");
-            //Setup game over menu (accessed automatically when the 
-            //game ends (by loss or success))
-            gameOverMenu.AddMenuItem("New Game", StartNewClassicGame);
-            gameOverMenu.AddMenuItem("Exit", ExitGame);
+            gameOverMenu = new ButtonMenu(this);
+            gameOverMenu.SetMenuHotkey(Keys.None);
+            //Setup game over menu (accessed automatically when the game ends
 
             //Add menu to the game's components
             Components.Add(gameOverMenu);
+        }
+
+        private void CreateNextLevelMenu()
+        {
+            nextLevelMenu = new ButtonMenu(this);
+            nextLevelMenu.SetMenuHotkey(Keys.None);
+
+            //Add menu to the game's components
+            Components.Add(nextLevelMenu);
+
+            //The buttons and menu texture are set after they are loaded in the load method.
         }
 
         private void CreateMenuMouse()
@@ -325,7 +320,7 @@ namespace Bubbel_Shot
         /// Generates a random field of balls
         /// TODO - ensure no balls are left floating
         /// </summary>
-        private void GeneratePlayingField()
+        private void GeneratePlayingField(int initialRowCount)
         {
             topAlignedRight = topInitiallyAlignedRight;
             playingField = new Color[10,14];
@@ -334,7 +329,6 @@ namespace Bubbel_Shot
             {
                 GenerateRow(rowNumber);
             }
-            //TODO ensure that no bubbels start hanging
         }
 
         private void GenerateRow(int rowNumber)
@@ -359,8 +353,7 @@ namespace Bubbel_Shot
 
         public void PauseGame()
         {
-            //pauseMenu.ShowMenu();//PMM
-            newPauseMenu.ShowMenu();
+            pauseMenu.ShowMenu();
             poppingParticleEngine.Pause();
             //set mice correctly
             menuMouseHandler.Enable();
@@ -373,8 +366,7 @@ namespace Bubbel_Shot
 
         public void ResumeGame()
         {
-            //pauseMenu.HideMenu(); //PMM
-            newPauseMenu.HideMenu();
+            pauseMenu.HideMenu();
             poppingParticleEngine.Resume();
             //set mice correctly
             menuMouseHandler.Disable();
@@ -387,7 +379,7 @@ namespace Bubbel_Shot
 
         public void GameOver(bool hasWon)
         {
-            //pauseMenu.SetMenuHotkey(Keys.None);//PMM
+            pauseMenu.SetMenuHotkey(Keys.None);
             gameRunning = false;
             gameOverMenu.SetBackground(null, 128, Color.White);
             menuMouseHandler.Enable();
@@ -397,17 +389,28 @@ namespace Bubbel_Shot
 
             if (hasWon)
             {
-                gameOverMenu.MenuTitle = "Congratulations, You Have Won!!!";
+                gameOverMenu.SetBackground(gameoverSuccessTexture, 255, Color.Green);
+                gameOverMenu.ShowMenu();
             }
             else
             {
-                gameOverMenu.MenuTitle = "Game Over - Try again!";
+                nextLevelMenu.SetBackground(gameoverFailTexture, 255, Color.Red);
+                nextLevelMenu.ShowMenu();
             }
 
-            gameOverMenu.ShowMenu();
         }
 
         private void StartNewClassicGame()
+        {
+            score = new Score();
+
+            DifficultySettings settings = new DifficultySettings();
+            StartNewLevel(settings);
+
+            ResumeGame();
+        }
+
+        private void StartNewLevel(DifficultySettings settings)
         {
             gameRunning = true;
             shotFired = false;
@@ -417,24 +420,34 @@ namespace Bubbel_Shot
             needToCheckColours = false;
 
             gameOverMenu.HideMenu();
-            //pauseMenu.HideMenu();//PMM
+            pauseMenu.HideMenu();
 
             //Setup initial available colours
-            availableColours = new List<Color>();
-            availableColours.Add(Color.HotPink);
-            availableColours.Add(Color.Yellow);
-            availableColours.Add(Color.Indigo);
-            availableColours.Add(Color.Chartreuse);
-            //availableColours.Add(Color.MediumOrchid);
-            availableColours.Add(Color.DodgerBlue);
-            availableColours.Add(Color.Crimson);
-            //availableColours.Add(new Color(128,0,64));
+            List<Color> sensibleColours = new List<Color>();
+            sensibleColours.Add(Color.HotPink);
+            sensibleColours.Add(Color.Yellow);
+            sensibleColours.Add(Color.Indigo);
+            sensibleColours.Add(Color.Chartreuse);
+            sensibleColours.Add(Color.MediumOrchid);
+            sensibleColours.Add(Color.DodgerBlue);
+            sensibleColours.Add(Color.Crimson);
+            sensibleColours.Add(new Color(128,0,64));
 
-            //reset scores
-            score = new Score();
+            availableColours = new List<Color>();
+            for (int i = 0; i < settings.NumberOfDifferentBallColours; i++)
+            {
+                int sensibleIndex = random.Next(0, sensibleColours.Count-1);
+                while (availableColours.Contains(sensibleColours[sensibleIndex]))
+                {
+                    sensibleIndex = random.Next(0, sensibleColours.Count-1);
+                }
+                availableColours.Add(sensibleColours[sensibleIndex]);
+            }
+
+            missedShotsAllowed = settings.MissedShotsAllowed;
 
             //generate the playing field
-            GeneratePlayingField();
+            GeneratePlayingField(settings.InitialRowCount);
 
             //set up cannon
             cannonData = new CannonData();
@@ -656,14 +669,22 @@ namespace Bubbel_Shot
 
             mainMenuButtonTexture = Content.Load<Texture2D>("MenuButton");
 
+            restartButtonTexture = Content.Load<Texture2D>("GameOverPlayAgainButton");
+            gameoverFailTexture = Content.Load<Texture2D>("GameOverFailure");
+            gameoverSuccessTexture = Content.Load<Texture2D>("GameOverSuccess");
+
             feedTexture = Content.Load<Texture2D>("Feed");
 
             //Set menu items
-            newPauseMenu.AddMenuItem(new MenuButton("Resume", pauseMenuResumeButton, new Rectangle(330, 250, 140, 50), ResumeGame));
-            newPauseMenu.AddMenuItem(new MenuButton("Exit", pauseMenuExitButton, new Rectangle(330, 320, 140, 50), ExitGame));
+            pauseMenu.AddMenuItem(new MenuButton("Resume", pauseMenuResumeButton, new Rectangle(330, 250, 140, 50), ResumeGame));
+            pauseMenu.AddMenuItem(new MenuButton("Exit", pauseMenuExitButton, new Rectangle(330, 320, 140, 50), ExitGame));
+
+
+            gameOverMenu.AddMenuItem(new MenuButton("Resume", restartButtonTexture, new Rectangle(330, 250, 140, 50), StartNewClassicGame));
+            gameOverMenu.AddMenuItem(new MenuButton("Exit", pauseMenuExitButton, new Rectangle(330, 320, 140, 50), ExitGame));
 
             //Set pause menu background
-            newPauseMenu.SetBackground(pauseMenuImage, 255, Color.White);
+            pauseMenu.SetBackground(pauseMenuImage, 255, Color.White);
 
             mainMenuButton.SetButtonImage(mainMenuButtonTexture);
             
@@ -713,28 +734,31 @@ namespace Bubbel_Shot
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
+
             if (onMainMenu)
             {
+                onMainMenu = false;
 
             }
-
-            if (gameRunning)
+            else
             {
-                ProcessKeyboard();
-                UpdateShot();
-                PostShotLandingProcessing();
-                AnimateBubbelsPopping();
-                DropBubbels();
-                SpinLoadedShot();
-                TestGameOver();
-                CheckFaultCount();
-                audioEngine.Update();
+                if (gameRunning)
+                {
+                    ProcessKeyboard();
+                    UpdateShot();
+                    PostShotLandingProcessing();
+                    AnimateBubbelsPopping();
+                    DropBubbels();
+                    SpinLoadedShot();
+                    TestGameOver();
+                    CheckFaultCount();
+                    audioEngine.Update();
+                }
+                if (gameRunning)
+                {
+                    RemoveColoursNotOnField();
+                }
             }
-            if (gameRunning)
-            {
-                RemoveColoursNotOnField();
-            }
-
             base.Update(gameTime);
         }
 
@@ -818,12 +842,12 @@ namespace Bubbel_Shot
                 if (bubbelsPopping)
                 {
                     EvaluateFallingBubbels();
-                    score.comboChain++;
+                    score.Hit();
                 }
                 else
                 {
-                    score.comboChain = 1;
-                    score.shotsUntilFieldDrops--;
+                    score.Miss();
+                    score.shotsMissed++;
                 }
 
                 //end shot landed phase
@@ -1066,9 +1090,7 @@ namespace Bubbel_Shot
                     soundBank.PlayCue("pop1");
 
                     //add to score
-                    score.numberPopped++;
-                    int scoreForThisBubbel = Score.baseScorePerPop * score.numberPopped * score.comboChain;
-                    score.currentScore += scoreForThisBubbel;
+                    int scoreForThisBubbel = score.Pop();
 
                     int next = random.Next(poppingBubbels.points.Count - 1);
                     poppingBubbels.currentlyPoppingProgress = 0;
@@ -1089,7 +1111,7 @@ namespace Bubbel_Shot
 
                 if (poppingBubbels.points.Count == 0)
                 {
-                    score.numberPopped = 0;
+                    score.numberPoppedInARow = 0;
                     poppingBubbels.currentlyPoppingProgress = 0;
                     bubbelsPopping = false;
                     bubbelsFalling = true;
@@ -1202,7 +1224,7 @@ namespace Bubbel_Shot
         {
             //if there's anything in the bottom row and it's not popping or falling
             //GAME OVER!
-            if (!bubbelsPopping && !bubbelsPopping)
+            if (!bubbelsPopping && !bubbelsPopping) //TODO wtf?
             {
                 bool gameLost = false;
                 bool gameWon = false;
@@ -1244,9 +1266,9 @@ namespace Bubbel_Shot
 
         private void CheckFaultCount()
         {
-            if (score.shotsUntilFieldDrops < 0)
+            if (score.shotsMissed > missedShotsAllowed)
             {
-                score.shotsUntilFieldDrops = Score.missedShotsAllowed;
+                score.shotsMissed = 0;
                 DropField();
             }
         }
@@ -1289,18 +1311,25 @@ namespace Bubbel_Shot
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            spriteBatch.Begin();
-            DrawGameFrame();
-            DrawBallField();
-            DrawPoppingBubbels();
-            spriteBatch.End();
+            if (onMainMenu)
+            {
 
-            spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.BackToFront, SaveStateMode.None);
-            DrawCannon();
-            DrawQueue();
-            DrawShot();
-            DrawScore();
-            spriteBatch.End();
+            }
+            else
+            {
+                spriteBatch.Begin();
+                DrawGameFrame();
+                DrawBallField();
+                DrawPoppingBubbels();
+                spriteBatch.End();
+
+                spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.BackToFront, SaveStateMode.None);
+                DrawCannon();
+                DrawQueue();
+                DrawShot();
+                DrawScore();
+                spriteBatch.End();
+            }
 
             base.Draw(gameTime);
         }
@@ -1436,7 +1465,7 @@ namespace Bubbel_Shot
 
         private void DrawScore()
         {
-            spriteBatch.DrawString(scoreFont, "Score: " + score.currentScore, new Vector2(45, 15), Color.Maroon);
+            spriteBatch.DrawString(scoreFont, "Score: " + score.currentTotalScore, new Vector2(45, 15), Color.Maroon);
         }
 
 
