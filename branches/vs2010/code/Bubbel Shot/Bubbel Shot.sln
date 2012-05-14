@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bubbel Shot", "Bubbel Shot\Bubbel Shot.csproj", "{A2CD9A43-C281-4AEE-A484-579AA0DCB89A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MattsMenuLibrary", "..\MattsMenuLibrary\MattsMenuLibrary\MattsMenuLibrary.csproj", "{940E48AD-EE73-44E6-9CC8-9F22ADE9983D}"
@@ -10,6 +10,16 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MattsButtonLibrary", "..\MattsButtonLibrary\MattsButtonLibrary\MattsButtonLibrary.csproj", "{21EBDC16-E486-40FE-A4F3-F34E363EDFF1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickableMenu", "..\ClickableMenu\ClickableMenu\ClickableMenu.csproj", "{A2D418CC-CACA-41A5-ABDD-14693A92C827}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bubbel ShotContent", "Bubbel Shot\Content\Bubbel ShotContent.contentproj", "{BDFE1F7F-7EAB-41A0-AABF-E54ED2B4B114}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MattsMenuLibraryContent", "..\MattsMenuLibrary\MattsMenuLibrary\Content\MattsMenuLibraryContent.contentproj", "{524EDC77-35BC-469D-AF05-CCF220790C9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MouseHandlerLibraryContent", "..\MouseHandlerLibrary\MouseHandlerLibrary\Content\MouseHandlerLibraryContent.contentproj", "{255C8D63-17F5-4191-BA15-689B3F103B2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MattsButtonLibraryContent", "..\MattsButtonLibrary\MattsButtonLibrary\Content\MattsButtonLibraryContent.contentproj", "{267DE554-44CE-4E16-AD48-6D4138F36109}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClickableMenuContent", "..\ClickableMenu\ClickableMenu\Content\ClickableMenuContent.contentproj", "{FC704D5E-8275-45FA-A3C8-92BDCB04A657}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
