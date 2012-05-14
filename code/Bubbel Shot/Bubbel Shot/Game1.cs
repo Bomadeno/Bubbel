@@ -8,8 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using Microsoft.Xna.Framework.Net;
-using Microsoft.Xna.Framework.Storage;
+
 using MattsMenuLibrary;
 using MouseHandlerLibrary;
 using MattsButtonLibrary;
@@ -31,6 +30,10 @@ namespace Bubbel_Shot
         #endregion
 
         #region Variables
+
+        //The Screens
+        GameScreen activeScreen;
+
 
         //'Game' variables
         GraphicsDeviceManager graphics;
@@ -57,7 +60,6 @@ namespace Bubbel_Shot
         //the menus
         GameMenu mainMenu;
         ButtonMenu pauseMenu;
-        ButtonMenu nextLevelMenu;
         ButtonMenu gameOverMenu;
 
         //The various textures and fonts
@@ -107,9 +109,7 @@ namespace Bubbel_Shot
         private float sensitivity = 0.01f;
 
         //game flow control
-        bool onMainMenu = true;
         bool gameRunning = false;
-        bool gamePaused = false;
         bool shotFired = false;
         bool shotLanded = false;
         bool bubbelsPopping = false;
@@ -164,10 +164,9 @@ namespace Bubbel_Shot
             CreatePauseMenu();
             CreateMainMenu();
             CreateGameOverMenu();
-            //CreateNextLevelMenu();
             //CreateGameFinishedMenu();
             CreateMenuMouse();
-            this.Deactivated += new EventHandler(Game1_Deactivated);
+            this.Deactivated += new EventHandler<System.EventArgs>(Game1_Deactivated);
 
         }
 
@@ -246,17 +245,6 @@ namespace Bubbel_Shot
             Components.Add(gameOverMenu);
         }
 
-        private void CreateNextLevelMenu()
-        {
-            nextLevelMenu = new ButtonMenu(this);
-            nextLevelMenu.SetMenuHotkey(Keys.None);
-
-            //Add menu to the game's components
-            Components.Add(nextLevelMenu);
-
-            //The buttons and menu texture are set after they are loaded in the load method.
-        }
-
         private void CreateMenuMouse()
         {
             menuMouseHandler = new MouseHandler(this);
@@ -293,14 +281,14 @@ namespace Bubbel_Shot
 
             base.Initialize();
 
-            //set up mice. something means they have to set up after initialised. TODO
+            //set up mice. something means they have to set up after initialized. TODO
             InitialiseMouses();
             
         }
 
         private void InitialiseMouses()
         {
-            //setup targetting mouse
+            //setup targeting mouse
             targettingMouseHandler.SetActiveRegion(new Rectangle(leftSide, 0, rightSide - leftSide, screenHeight));
             targettingMouseHandler.SetCursorMode(CursorMode.Crosshair);
             targettingMouseHandler.AddMouseMovedAction(TargetWithMouse);
@@ -340,7 +328,7 @@ namespace Bubbel_Shot
                 //makes a certain percentage of the slots empty
                 if (random.NextDouble() < percentBlank)
                 {
-                    playingField[j, rowNumber] = Color.TransparentBlack;
+                    playingField[j, rowNumber] = Color.Transparent;
                 }
             }
         }
@@ -394,8 +382,8 @@ namespace Bubbel_Shot
             }
             else
             {
-                nextLevelMenu.SetBackground(gameoverFailTexture, 255, Color.Red);
-                nextLevelMenu.ShowMenu();
+                gameOverMenu.SetBackground(gameoverFailTexture, 255, Color.Red);
+                gameOverMenu.ShowMenu();
             }
 
         }
@@ -570,7 +558,7 @@ namespace Bubbel_Shot
                 for (int j = 0; j < playingField.GetLength(0); j++)
                 {
                     //For each bubble position in the gameboard that is not null
-                    if (playingField[j, i] != Color.TransparentBlack)
+                    if (playingField[j, i] != Color.Transparent)
                     {
                         focusBall = new Vector2(j * (36 + horizontalPadding) + leftSide + leftPadding + (18 * ((i + topAlignedRight) % 2)), y);
                         focusBall += new Vector2(18, 18);
@@ -603,7 +591,7 @@ namespace Bubbel_Shot
             if (j >= playingField.GetLength(0))
                 j = playingField.GetLength(0) - 1;
 
-            if (playingField[j, i] == Color.TransparentBlack)
+            if (playingField[j, i] == Color.Transparent)
             {
                 playingField[j, i] = shotColor;
                 justAddedBubbel = new Point(j, i);
@@ -735,29 +723,21 @@ namespace Bubbel_Shot
                 this.Exit();
 
 
-            if (onMainMenu)
+            if (gameRunning)
             {
-                onMainMenu = false;
-
+                ProcessKeyboard();
+                UpdateShot();
+                PostShotLandingProcessing();
+                AnimateBubbelsPopping();
+                DropBubbels();
+                SpinLoadedShot();
+                TestGameOver();
+                CheckFaultCount();
+                audioEngine.Update();
             }
-            else
+            if (gameRunning)
             {
-                if (gameRunning)
-                {
-                    ProcessKeyboard();
-                    UpdateShot();
-                    PostShotLandingProcessing();
-                    AnimateBubbelsPopping();
-                    DropBubbels();
-                    SpinLoadedShot();
-                    TestGameOver();
-                    CheckFaultCount();
-                    audioEngine.Update();
-                }
-                if (gameRunning)
-                {
-                    RemoveColoursNotOnField();
-                }
+                RemoveColoursNotOnField();
             }
             base.Update(gameTime);
         }
@@ -894,7 +874,7 @@ namespace Bubbel_Shot
                 foreach (Point p in poppingBubbels.points)
                 {
                     poppingBubbels.colours.Add(playingField[p.X, p.Y]);
-                    playingField[p.X, p.Y] = Color.TransparentBlack;
+                    playingField[p.X, p.Y] = Color.Transparent;
                 }
 
                 //make it so the popping is started
@@ -915,7 +895,7 @@ namespace Bubbel_Shot
             //add top row of bubbels to unexplored bubbels
             for (int j = 0; j < playingField.GetLength(0); j++)
             {
-                if (playingField[j, 0] != Color.TransparentBlack && !poppingBubbels.points.Contains(new Point(j,0)))
+                if (playingField[j, 0] != Color.Transparent && !poppingBubbels.points.Contains(new Point(j,0)))
                 {
                     Point temp = new Point(j, 0);
                     secureBubbels.Add(temp);
@@ -951,7 +931,7 @@ namespace Bubbel_Shot
             {
                 for (int j = 0; j < playingField.GetLength(0); j++)
                 {
-                    if (playingField[j, i] != Color.TransparentBlack && !secureBubbels.Contains(new Point(j, i)) && !poppingBubbels.points.Contains(new Point(j, i)))
+                    if (playingField[j, i] != Color.Transparent && !secureBubbels.Contains(new Point(j, i)) && !poppingBubbels.points.Contains(new Point(j, i)))
                     {
                         score.numberDropped++;
                         fallingBubbels.points.Add(new Point(j, i));
@@ -992,7 +972,7 @@ namespace Bubbel_Shot
             List<Point> nonTransparentNeighbours = GetNeighbours(centreBubbel);
             for (int i = nonTransparentNeighbours.Count - 1; i >= 0; i--)
             {
-                if (playingField[nonTransparentNeighbours[i].X, nonTransparentNeighbours[i].Y] == Color.TransparentBlack
+                if (playingField[nonTransparentNeighbours[i].X, nonTransparentNeighbours[i].Y] == Color.Transparent
                     || poppingBubbels.points.Contains(nonTransparentNeighbours[i]))
                 {
                     nonTransparentNeighbours.RemoveAt(i);
@@ -1117,7 +1097,7 @@ namespace Bubbel_Shot
                     bubbelsFalling = true;
                     foreach (Point p in fallingBubbels.points)
                     {
-                        playingField[p.X, p.Y] = Color.TransparentBlack;
+                        playingField[p.X, p.Y] = Color.Transparent;
                     }
                 }
             }
@@ -1231,7 +1211,7 @@ namespace Bubbel_Shot
 
                 for (int j = 0; j < playingField.GetLength(0); j++)
                 {
-                    if (playingField[j, playingField.GetLength(1) - 1] != Color.TransparentBlack)
+                    if (playingField[j, playingField.GetLength(1) - 1] != Color.Transparent)
                     {
                         gameLost = true;
                     }
@@ -1249,7 +1229,7 @@ namespace Bubbel_Shot
                 //SUCCESS!
                 for (int j = 0; j < playingField.GetLength(0); j++)
                 {
-                    if (playingField[j, 0] != Color.TransparentBlack)
+                    if (playingField[j, 0] != Color.Transparent)
                     {
                         gameWon = false;
                         break;
@@ -1311,25 +1291,18 @@ namespace Bubbel_Shot
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            if (onMainMenu)
-            {
+            spriteBatch.Begin();
+            DrawGameFrame();
+            DrawBallField();
+            DrawPoppingBubbels();
+            spriteBatch.End();
 
-            }
-            else
-            {
-                spriteBatch.Begin();
-                DrawGameFrame();
-                DrawBallField();
-                DrawPoppingBubbels();
-                spriteBatch.End();
-
-                spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.BackToFront, SaveStateMode.None);
-                DrawCannon();
-                DrawQueue();
-                DrawShot();
-                DrawScore();
-                spriteBatch.End();
-            }
+            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            DrawCannon();
+            DrawQueue();
+            DrawShot();
+            DrawScore();
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
@@ -1355,7 +1328,7 @@ namespace Bubbel_Shot
                 for (int j = 0; j < playingField.GetLength(0); j++)
                 {
                     //If there is a ball at a location
-                    if (playingField[j, i] != Color.TransparentBlack)
+                    if (playingField[j, i] != Color.Transparent)
                     {
                         //Draw it
                         spriteBatch.Draw(bubbelTexture, VectorFromPoint(j, i), playingField[j, i]);

@@ -1,7 +1,7 @@
-Signature = XACT2;
-Version = 16;
-Content Version = 43;
-Release = August 2007;
+Signature = XACT3;
+Version = 18;
+Content Version = 46;
+Release = February 2010;
 
 Options
 {
@@ -161,7 +161,7 @@ Global Settings
         Value = 0.000000;
         Initial Value = 0.000000;
         Min = 0.000000;
-        Max = 15.000001;
+        Max = 15000.000000;
     }
 
     Variable
@@ -178,7 +178,7 @@ Global Settings
         Value = 0.000000;
         Initial Value = 0.000000;
         Min = 0.000000;
-        Max = 15.000001;
+        Max = 15000.000000;
     }
 
     Variable
@@ -225,6 +225,12 @@ Wave Bank
     Windows Bank Path Edited = 0;
     Seek Tables = 1;
     Compression Preset Name = <none>;
+    Xbox Bank Last Modified Low = 0;
+    Xbox Bank Last Modified High = 0;
+    PC Bank Last Modified Low = 0;
+    PC Bank Last Modified High = 0;
+    Header Last Modified Low = 0;
+    Header Last Modified High = 0;
     Bank Last Revised Low = 1686315350;
     Bank Last Revised High = 30036441;
 
@@ -305,6 +311,8 @@ Sound Bank
     Windows File = Win\bubbelSoundBank.xsb;
     Xbox Bank Path Edited = 0;
     Windows Bank Path Edited = 0;
+    Header Last Modified High = 0;
+    Header Last Modified Low = 0;
 
     Sound
     {
@@ -321,6 +329,7 @@ Sound Bank
         Track
         {
             Volume = 0;
+            Use Filter = 0;
 
             Play Wave Event
             {
@@ -329,7 +338,7 @@ Sound Bank
                 Use Center Speaker = 1;
                 New Speaker Position On Loop = 1;
                 Speaker Position Angle = 0.000000;
-                Speaer Position Arc = 0.000000;
+                Speaker Position Arc = 0.000000;
 
                 Event Header
                 {
@@ -367,6 +376,7 @@ Sound Bank
         Track
         {
             Volume = 0;
+            Use Filter = 0;
 
             Play Wave Event
             {
@@ -375,7 +385,7 @@ Sound Bank
                 Use Center Speaker = 1;
                 New Speaker Position On Loop = 1;
                 Speaker Position Angle = 0.000000;
-                Speaer Position Arc = 0.000000;
+                Speaker Position Arc = 0.000000;
 
                 Event Header
                 {
@@ -413,6 +423,7 @@ Sound Bank
         Track
         {
             Volume = 0;
+            Use Filter = 0;
 
             Play Wave Event
             {
@@ -421,7 +432,7 @@ Sound Bank
                 Use Center Speaker = 1;
                 New Speaker Position On Loop = 1;
                 Speaker Position Angle = 0.000000;
-                Speaer Position Arc = 0.000000;
+                Speaker Position Arc = 0.000000;
 
                 Event Header
                 {
