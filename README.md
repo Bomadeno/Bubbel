@@ -1,0 +1,3 @@
+# Bubbel
+Bubbel is a "bubbel shooter" clone, with a focus on ironing out some annoyances like when bubbles stick in the wrong place.
+I started this project in the summer of 2010, after graduating and before getting my first job. It was built with XNA framework - which was easier than my previous work with MOGRE. Unfortunately for bubbel, XNA was deprecated shortly afterwards, which left Bubbel very hard to "get back to". Is there anything worth getting back to? I'm not even sure! XNA required a lot of busywork managing imports and assets. I suspect a port to Unity (for example) would be quite easy.
