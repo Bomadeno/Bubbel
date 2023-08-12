@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using MattsMenuLibrary;
 using MattsButtonLibrary;
 using ClickableMenu;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = System.Random;
 
 namespace Bubbel_Shot
@@ -57,6 +59,9 @@ namespace Bubbel_Shot
         Vector2 leftAnchor = new Vector2(0, 0);
         Vector2 rightAnchor = new Vector2(0, 0);
 
+        //todo should cannon be a separate/more self contained?
+        [SerializeField] private GameObject rotatableCannonBody;
+        [SerializeField] private SpriteRenderer bubbelInCannon;
         Sprite cannonFrame; //CannonFrame
         Sprite cannonBodyFore; //CannonBodyFore
         Sprite cannonBodyBack; //CannonBodyBack
@@ -86,7 +91,7 @@ namespace Bubbel_Shot
       
 
         CannonData cannonData;
-        private float sensitivity = 0.01f;
+        [SerializeField] private float keyboardAimSensitivity = 1f;
 
         //game flow control
         bool onMainMenu = true;
@@ -101,6 +106,7 @@ namespace Bubbel_Shot
 
         //score
         Score score;
+        [SerializeField] private TextMeshPro scoreDisplay;
 
         //Difficulty settings
         int missedShotsAllowed;
@@ -115,8 +121,10 @@ namespace Bubbel_Shot
 
         //bubbels popping and dropping
         FallingBubbels fallingBubbels;
+        [SerializeField] private FallingParticleEngine fallingParticleEnginePrefab;
         FallingParticleEngine fallingParticleEngine;
         PoppingBubbels poppingBubbels;
+        [SerializeField] private PoppingParticleEngine poppingParticleEnginePrefab;
         PoppingParticleEngine poppingParticleEngine;
 
         private int popInterval = 4;
@@ -163,12 +171,8 @@ namespace Bubbel_Shot
 
         private void CreateParticleSystems()
         {
-            //create bubbel popping particle system
-            var poppingParticleEngineGO = new GameObject("Popping particle engine");
-            poppingParticleEngine = poppingParticleEngineGO.AddComponent<PoppingParticleEngine>();
-
-            var fallingParticleEngingGO = new GameObject("Falling particle engine");
-            fallingParticleEngine = fallingParticleEngingGO.AddComponent<FallingParticleEngine>();
+            poppingParticleEngine = Instantiate(poppingParticleEnginePrefab, transform);
+            fallingParticleEngine = Instantiate(fallingParticleEnginePrefab, transform);
         }
 
         private void CreateInGameMouse()
@@ -644,15 +648,15 @@ namespace Bubbel_Shot
         /// </summary>
         private void ProcessKeyboard(float deltaTime)
         {
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            if (Input.GetKey(KeyCode.LeftArrow))
             {
-                cannonData.Angle -= sensitivity * deltaTime;
+                cannonData.Angle -= keyboardAimSensitivity * deltaTime;
                 if (cannonData.Angle < -1.1)
                     cannonData.Angle = -1.1f;
             }
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            if (Input.GetKey(KeyCode.RightArrow))
             {
-                cannonData.Angle += sensitivity * deltaTime;
+                cannonData.Angle += keyboardAimSensitivity * deltaTime;
                 if (cannonData.Angle > 1.1)
                     cannonData.Angle = 1.1f;
             }
@@ -1196,19 +1200,13 @@ namespace Bubbel_Shot
             }
             else
             {
-                //spriteBatch.Begin();
                 UpdateBallField();
-                //DrawPoppingBubbels();
-                //spriteBatch.End();
-
-                /*
-                spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.BackToFront, SaveStateMode.None);
+                DrawPoppingBubbels();
+                
                 DrawCannon();
                 DrawQueue();
                 DrawShot();
                 DrawScore();
-                spriteBatch.End();
-                */
             }
 
         }
@@ -1231,18 +1229,27 @@ namespace Bubbel_Shot
                     //If there is a ball at a location
                     if (playingField[j, i] != TransparentBlack)
                     {
-                        //Draw it
-                        //todo these are... updated too often, in the wrong place, the wrong scale. Otherwise... getting there.
-                        var bubbel = Instantiate(bubbelPrefab, VectorFromPoint(j, i), Quaternion.identity);
-                        bubbel.color = playingField[j, i];
-                        //draw on top of background. not the best approach but it'll do
-                        bubbel.sortingOrder = 5;
-                        bubbelGridVisuals.Add(bubbel);
+                        DrawSingleBubbelAtPoint(j, i, playingField[j, i]);
                     }
                 }
             }
         }
-        /*
+
+        private void DrawSingleBubbelInWorld(Vector2 position, Color bubbelColor)
+        {
+            //Draw it
+            //todo these are recreated way too often. they shouldn't be
+            var bubbel = Instantiate(bubbelPrefab, position, Quaternion.identity);
+            bubbel.color = bubbelColor;
+            //draw on top of background. not the best approach but it'll do
+            bubbel.sortingOrder = 5;
+            bubbelGridVisuals.Add(bubbel);
+        }
+
+        private void DrawSingleBubbelAtPoint(int j, int i, Color bubbelColor)
+        {
+            DrawSingleBubbelInWorld(VectorFromPoint(j, i), bubbelColor);
+        }
 
         private void DrawPoppingBubbels()
         {
@@ -1251,7 +1258,8 @@ namespace Bubbel_Shot
                 //draw 'existing' bubbels that are yet to be popped but will soon be popped
                 for (int i = 0; i < poppingBubbels.points.Count; i++)
                 {
-                    spriteBatch.Draw(bubbelTexture, VectorFromPoint(poppingBubbels.points[i]), poppingBubbels.colours[i]);
+                    var poppingBubbelPoint = poppingBubbels.points[i];
+                    DrawSingleBubbelAtPoint(poppingBubbelPoint.X, poppingBubbelPoint.Y, poppingBubbels.colours[i]);
                 }
             }
         }
@@ -1259,22 +1267,25 @@ namespace Bubbel_Shot
 
         private void DrawCannon()
         {
-            //Fade bubbel into cannon
+            //Port note: the gameobject should consist of frame -> background -> ball -> foreground. The cannon fore should be wheat color,  new Color(0.96f, 0.87f, 0.7f), #F5DEB3
+            
+            //Fade bubbel into cannon. the bubbel spins in the cannon.
             if (shotReloading)
             {
                 Color currentBallColorSemiTransparent = cannonData.currentBallColor;
-                currentBallColorSemiTransparent.A = (byte)((float)shotReloadingStage/100.0f * 255.0f);
-                spriteBatch.Draw(bubbelTexture, cannonFulcrum, null, currentBallColorSemiTransparent, cannonData.currentBallRotation, bubbelOrigin, (float)shotReloadingStage / 100.0f, SpriteEffects.None, 0.4f);
+                currentBallColorSemiTransparent.a = (byte)(shotReloadingStage/100.0f * 255.0f);
+                bubbelInCannon.color = currentBallColorSemiTransparent;
+                bubbelInCannon.transform.localRotation = Quaternion.Euler(0, 0, cannonData.currentBallRotation);
             }
             else
             {
-                spriteBatch.Draw(bubbelTexture, cannonFulcrum, null, cannonData.currentBallColor, cannonData.currentBallRotation, bubbelOrigin, 1, SpriteEffects.None, 0.4f);
+                bubbelInCannon.color = cannonData.currentBallColor;
+                bubbelInCannon.transform.localRotation = Quaternion.Euler(0, 0, cannonData.currentBallRotation);
             }
-            spriteBatch.Draw(cannonBodyFore, cannonFulcrum, null, Color.Wheat, cannonData.Angle, cannonBodyOrigin, 1, SpriteEffects.None, 0.1f);
-            spriteBatch.Draw(cannonBodyBack, cannonFulcrum, null, Color.White, cannonData.Angle, cannonBodyOrigin, 1, SpriteEffects.None, 0.5f);
-            spriteBatch.Draw(cannonFrame, cannonFulcrum, null, Color.White, 0, cannonFrameOrigin, 1, SpriteEffects.None, 0.6f);
+            rotatableCannonBody.transform.rotation = Quaternion.Euler(0, 0, -cannonData.Angle * Mathf.Rad2Deg);
         }
 
+        
         private void DrawQueue()
         {
 
@@ -1285,13 +1296,14 @@ namespace Bubbel_Shot
                 if (shotReloadingStage < 25)
                 {
                     Color currentBallColorSemiTransparent = cannonData.currentBallColor;
-                    currentBallColorSemiTransparent.A = (byte)(255 - percentageDone * 1023);
-                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[0], null, currentBallColorSemiTransparent, 0.0f, bubbelOrigin, 1.0f , SpriteEffects.None, 0.9f);
-
-                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[1], null, cannonData.nextFiveShots[0], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[2], null, cannonData.nextFiveShots[1], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[3], null, cannonData.nextFiveShots[2], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[4], null, cannonData.nextFiveShots[3], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                    currentBallColorSemiTransparent.a = (byte)(255 - percentageDone * 1023);
+                    
+                    DrawSingleBubbelInWorld(cannonData.nextFiveShotLocation[0]* scaleFactor, currentBallColorSemiTransparent);
+                    
+                    DrawSingleBubbelInWorld(cannonData.nextFiveShotLocation[1] * scaleFactor, cannonData.nextFiveShots[0]);
+                    DrawSingleBubbelInWorld(cannonData.nextFiveShotLocation[2] * scaleFactor, cannonData.nextFiveShots[1]);
+                    DrawSingleBubbelInWorld(cannonData.nextFiveShotLocation[3] * scaleFactor, cannonData.nextFiveShots[2]);
+                    DrawSingleBubbelInWorld(cannonData.nextFiveShotLocation[4] * scaleFactor, cannonData.nextFiveShots[3]);
                 }
                 //Slide next bubbels along
                 else
@@ -1299,14 +1311,15 @@ namespace Bubbel_Shot
                     float percentageSlideDone = ((float)shotReloadingStage-25.0f) / 75.0f;
                     //move balls 40 right
                     Vector2 interpVec = new Vector2(40 * (1.0f-percentageSlideDone), 0);
-                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[0] + interpVec, null, cannonData.nextFiveShots[0], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[1] + interpVec, null, cannonData.nextFiveShots[1], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[2] + interpVec, null, cannonData.nextFiveShots[2], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[3] + interpVec, null, cannonData.nextFiveShots[3], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                    spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[4] + interpVec, null, cannonData.nextFiveShots[4], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                    
+                    DrawSingleBubbelInWorld((cannonData.nextFiveShotLocation[0] + interpVec) * scaleFactor, cannonData.nextFiveShots[0]);
+                    DrawSingleBubbelInWorld((cannonData.nextFiveShotLocation[1] + interpVec) * scaleFactor, cannonData.nextFiveShots[1]);
+                    DrawSingleBubbelInWorld((cannonData.nextFiveShotLocation[2] + interpVec) * scaleFactor, cannonData.nextFiveShots[2]);
+                    DrawSingleBubbelInWorld((cannonData.nextFiveShotLocation[3] + interpVec) * scaleFactor, cannonData.nextFiveShots[3]);
+                    DrawSingleBubbelInWorld((cannonData.nextFiveShotLocation[4] + interpVec) * scaleFactor, cannonData.nextFiveShots[4]);
                 }
-                
-                //spriteBatch.Draw(feedTexture, new Vector2(586, 537), null, Color.White, 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.5f);
+
+                //todo probably delete: spriteBatch.Draw(feedTexture, new Vector2(586, 537), null, Color.White, 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.5f);
 
                 shotReloadingStage += 5;
                 if (shotReloadingStage > 100)
@@ -1317,27 +1330,30 @@ namespace Bubbel_Shot
             }
             else
             {
-                //spriteBatch.Draw(feedTexture, new Vector2(586, 537), null, Color.White, 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.5f);
-                spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[0], null, cannonData.nextFiveShots[0], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[1], null, cannonData.nextFiveShots[1], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[2], null, cannonData.nextFiveShots[2], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[3], null, cannonData.nextFiveShots[3], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
-                spriteBatch.Draw(bubbelTexture, cannonData.nextFiveShotLocation[4], null, cannonData.nextFiveShots[4], 0.0f, bubbelOrigin, 1.0f, SpriteEffects.None, 0.9f);
+                //todo probably delete: spriteBatch.Draw(feedTexture, new Vector2(586, 537), null, Color.White, 0.0f, zeroOrigin, 1.0f, SpriteEffects.None, 0.5f);
+                
+                //todo could just use interpVec above set to 0,0?
+                DrawSingleBubbelInWorld((cannonData.nextFiveShotLocation[0]) * scaleFactor, cannonData.nextFiveShots[0]);
+                DrawSingleBubbelInWorld((cannonData.nextFiveShotLocation[1]) * scaleFactor, cannonData.nextFiveShots[1]);
+                DrawSingleBubbelInWorld((cannonData.nextFiveShotLocation[2]) * scaleFactor, cannonData.nextFiveShots[2]);
+                DrawSingleBubbelInWorld((cannonData.nextFiveShotLocation[3]) * scaleFactor, cannonData.nextFiveShots[3]);
+                DrawSingleBubbelInWorld((cannonData.nextFiveShotLocation[4]) * scaleFactor, cannonData.nextFiveShots[4]);
             }
         }
+        
 
         private void DrawShot()
         {
             if (shotFired)
             {
-                spriteBatch.Draw(bubbelTexture, shotLocation, null, shotColor, 0, new Vector2(18, 18), 1, SpriteEffects.None, 0.3f);
+                //todo may need to offset by -18,-18*scale for pivot
+                DrawSingleBubbelInWorld(shotLocation * scaleFactor, shotColor);
             }
         }
 
         private void DrawScore()
         {
-            spriteBatch.DrawString(scoreFont, "Score: " + score.currentTotalScore, new Vector2(45, 15), Color.Maroon);
+            scoreDisplay.text = "Score: " + score.currentTotalScore;
         }
-        */
     }
 }

@@ -47,3 +47,9 @@ MonoBehaviour:
   whitePixel: {fileID: 21300000, guid: 5094d61377ed21142b07ce52ba363076, type: 3}
   gameMenuPrefab: {fileID: 2087930527949689740, guid: c02c5f963a6c82342ada7ac0ff42febc, type: 3}
   bubbelPrefab: {fileID: 2152340156970543156, guid: f6547805f5eb65c45bd1c6d334691518, type: 3}
+  scaleFactor: {x: 0.01, y: -0.01}
+  rotatableCannonBody: {fileID: 0}
+  bubbelInCannon: {fileID: 0}
+  scoreDisplay: {fileID: 0}
+  fallingParticleEnginePrefab: {fileID: 2526065282689829556, guid: 10fa52e97c160404f9e45f34caf5c3cb, type: 3}
+  poppingParticleEnginePrefab: {fileID: 7954332377960835482, guid: fe2b4a2996e6d6b4dbbe9410b41ddaa0, type: 3}

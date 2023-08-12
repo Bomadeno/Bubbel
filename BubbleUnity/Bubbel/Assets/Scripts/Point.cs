@@ -1,6 +1,6 @@
 ﻿namespace Bubbel_Shot
 {
-    public class Point
+    public struct Point
     {
         public int X, Y;
 
