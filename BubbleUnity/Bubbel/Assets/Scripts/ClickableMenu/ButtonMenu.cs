@@ -10,8 +10,6 @@ namespace ClickableMenu
 
     public class ButtonMenu : UnityEngine.MonoBehaviour
     {
-        private List<MenuButton> menuItems;
-
         //default background pixel for simple coloured backgrounds.
         private UnityEngine.Sprite backgroundPixel;
 
@@ -29,26 +27,7 @@ namespace ClickableMenu
 
         private void Awake()
         {
-            menuItems = new List<MenuButton>();
             isEnabled = false;
-        }
-
-
-
-        public void AddMenuItem(MenuButton item)
-        {
-            menuItems.Add(item);
-        }
-
-        public void RemoveMenuItem(string descriptor)
-        {
-            for (int i = menuItems.Count - 1; i >= 0; i--)
-            {
-                if (menuItems[i].descriptor.Equals(descriptor))
-                {
-                    menuItems.RemoveAt(i);
-                }
-            }
         }
 
         public void ShowMenu()
@@ -75,31 +54,6 @@ namespace ClickableMenu
             }
         }
 
-        public void SetResumeMethod(ClickableMenuAction resume)
-        {
-            if (resume != null)
-            {
-                this.resumeAction = resume;
-                hasResumeMethod = true;
-            }
-            else
-            {
-                hasResumeMethod = false;
-            }
-        }
-
-        public void SetPauseMethod(ClickableMenuAction pause)
-        {
-            if (pause != null)
-            {
-                this.pauseAction = pause;
-                hasPauseMethod = true;
-            }
-            else
-            {
-                hasPauseMethod = false;
-            }
-        }
 
         public void SetMenuHotkey(KeyCode newMenuHotkey)
         {
@@ -107,21 +61,9 @@ namespace ClickableMenu
         }
 
 
-        protected void LoadContent()
-        {
-            background = new Background(backgroundPixel, 128, Color.white);
-        }
-
 
         public void Update()
         {
-            if (isEnabled)
-            {
-                foreach (MenuButton button in menuItems)
-                {
-                    button.Update();
-                }
-            }
             ProcessMenuHotkey();
         }
 
@@ -134,9 +76,6 @@ namespace ClickableMenu
         /// 
         /// When checking for the menu hotkey, the menu ignores a held key, but does accept
         /// a rapid double press.
-        /// 
-        /// Todo (bomadeno) - Add a more general hotkey addeer, allow a keysignature/action/ Rename to Processhotkeys.
-        /// Todo (bomadeno) Iterate over hotkeys.
         /// 
         /// Default behaviour: Escape is hotkey, pressing it shows/hides menu
         /// </summary>

@@ -34,7 +34,7 @@ namespace Bubbel_Shot
 
         public void AddBubbel(Vector2 position, Color color, int score)
         {
-            var newOne = Instantiate(poppingBubbelPrefab, position, Quaternion.identity, transform);
+            var newOne = Instantiate(poppingBubbelPrefab, position, Quaternion.Euler(0, 0,Random.Range(0,360f)), transform);
             newOne.InitializePoppingBubbelParticle(color, score);
             bubbelParticles.Add(newOne);
         }
@@ -54,7 +54,6 @@ namespace Bubbel_Shot
                         bubbelParticles.RemoveAt(i);
                     }
                 }
-                //TODO maybe vary location slightly?
             }
         }
     }

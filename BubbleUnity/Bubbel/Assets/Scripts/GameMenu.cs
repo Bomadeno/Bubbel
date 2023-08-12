@@ -1,11 +1,7 @@
-using System;
 using System.Collections.Generic;
-using Bubbel_Shot;
 using Color = UnityEngine.Color;
-using Vector2 = UnityEngine.Vector2;
 using Rect = UnityEngine.Rect;
 
-//using MattsMouseHandlerLibrary;
 
 namespace MattsMenuLibrary
 {
@@ -13,15 +9,10 @@ namespace MattsMenuLibrary
     {
         [UnityEngine.SerializeField] private UnityEngine.UI.Image background;
         
-        //private MouseHandler mouseHandler;
-
         //internal variables for getting stuff done
-        
         private List<MenuItem> menuItems;
         //-1 indicates nothing is selected
         private int currentlySelected;
-        private Position titlePosition;
-        private Position menuItemsPosition;
         //prevent menu scrolling too fast
         private int ignoreDownArrow;
         private int ignoreUpArrow;
@@ -64,8 +55,6 @@ namespace MattsMenuLibrary
             menuIsShown = false;
             currentlySelected = -1;
             menuLoopsRound = true;
-            titlePosition = Position.Centre;
-            menuItemsPosition = Position.UnderTitle;
             activecolor = Color.red;
             inactiveColor = Color.black;
             titleColor = inactiveColor;
@@ -96,28 +85,6 @@ namespace MattsMenuLibrary
             currentlySelected = -1;
         }
 
-        public void SetMenuItemsPosition(Position position)
-        {
-            menuItemsPosition = position;
-        }
-
-        public void SetTitlePosition(Position position)
-        {
-            if (position == Position.UnderTitle)
-            {
-                throw new BubbelException("Error in calling code... title cannot be positioned under title.");
-            }
-            else
-            {
-                titlePosition = position;
-            }
-        }
-
-        public void SetBackground(UnityEngine.Sprite image, Color colour)
-        {
-            background.sprite = image;
-            background.color = colour;
-        }
 
         public void MoveSelectionUp()
         {
@@ -177,31 +144,6 @@ namespace MattsMenuLibrary
             menuItems[currentlySelected].Activate();
         }
 
-        public void SetResumeMethod(MenuAction resume)
-        {
-            if (resume != null)
-            {
-                this.resume = resume;
-                hasResumeMethod = true;
-            }
-            else
-            {
-                hasResumeMethod = false;
-            }
-        }
-
-        public void SetPauseMethod(MenuAction pause)
-        {
-            if (pause != null)
-            {
-                this.pause = pause;
-                hasPauseMethod = true;
-            }
-            else
-            {
-                hasPauseMethod = false;
-            }
-        }
 
         public void ShowMenu()
         {
@@ -214,14 +156,6 @@ namespace MattsMenuLibrary
             this.menuIsShown = false;
             ignoreMenuHotkey = menuLag;
         }
-
-        public void SetMenuHotkey(UnityEngine.KeyCode  newMenuHotkey)
-        {
-            this.menuHotkey = newMenuHotkey;
-        }
-
-        //todo: click(x,y) (activate item under click)
-
 
         public void Update()
         {
@@ -313,231 +247,5 @@ namespace MattsMenuLibrary
                 ignoreEnter--;
             }
         }
-        
-        //big todo: turn this code into corresponding canvas layout
-        
-        /*
-
-        public void CreateMenuRectangle()
-        {
-            menuArea = new Rect(0, 0, 0, 0);
-            if (menuItems.Count > 0)
-            {
-                menuArea.height = (int)activeFont.MeasureString(menuItems[0].menuItemName).Y;
-                foreach (MenuItem mu in menuItems)
-                {
-                    if (activeFont.MeasureString(mu.menuItemName).X > menuArea.Width)
-                    {
-                        //gets the widest menu item
-                        menuArea.Width = (int)activeFont.MeasureString(mu.menuItemName).X;
-                    }
-                }
-            }
-            menuArea.Height = (menuArea.Height + lineSpacing) * menuItems.Count;
-        }
-
-
-        public override void Draw(GameTime gameTime)
-        {
-            if (menuIsShown)
-            {
-                DrawMenu();
-            }
-        }
-
-
-        public void DrawMenu()
-        {
-            
-            int backBufferWidth = UnityEngine.Screen.width;
-            int backBufferHeight = UnityEngine.Screen.height;
-            Vector2 titleSize = titleFont.MeasureString(menuTitle);
-
-            
-
-
-
-            spriteBatch.Begin();
-            switch (titlePosition)
-            {
-                case Position.BottomLeft:
-                    if (menuItemsPosition == Position.UnderTitle)
-                    {
-                        //draw menu title then draw menu items
-                        spriteBatch.DrawString(titleFont, menuTitle, new Vector2(padding, backBufferHeight - 40 - titleSize.Y- menuArea.Height), titleColor);
-                        //left align
-                        DrawMenuItems(new Vector2(padding, backBufferHeight - 40 - menuArea.Height), Alignment.Left);
-                    }
-                    else
-                    {
-                        //draw menu title bottom left
-                        spriteBatch.DrawString(titleFont, menuTitle, new Vector2(40,backBufferHeight-40-titleSize.Y), titleColor);
-                        //then draw menu items wherever
-                        DrawMenuItems();
-                    }
-                    break;
-
-                case Position.BottomRight:
-                    if (menuItemsPosition == Position.UnderTitle)
-                    {
-                        //draw menu title then draw menu items
-                        spriteBatch.DrawString(titleFont, menuTitle, new Vector2(backBufferWidth - padding - titleSize.X, backBufferHeight - 40 - titleSize.Y - menuArea.Height), titleColor);
-                        //right align
-                        DrawMenuItems(new Vector2(backBufferWidth - padding-menuArea.Width, backBufferHeight - 40 - menuArea.Height), Alignment.Right);
-                    }
-                    else
-                    {
-                        //draw menu title in bottom right
-                        spriteBatch.DrawString(titleFont, menuTitle, new Vector2(backBufferWidth - padding - titleSize.X, backBufferHeight - 40 - titleSize.Y), titleColor);
-                        //then menu items wherever
-                        DrawMenuItems();
-                    }
-                    break;
-
-                case Position.Centre:
-                    if (menuItemsPosition == Position.UnderTitle)
-                    {
-                        //draw menu title
-                        spriteBatch.DrawString(titleFont, menuTitle, new Vector2(backBufferWidth / 2 - titleSize.X / 2, backBufferHeight / 2 - menuArea.Height / 2 - titleSize.Y / 2), titleColor);
-                        //then menu items underneath, centre align
-                        DrawMenuItems(new Vector2(backBufferWidth / 2 - (menuArea.Width / 2), (backBufferHeight / 2) - (menuArea.Height / 2) + titleSize.Y / 2), Alignment.Centre);
-                    }
-                    else
-                    {
-                        //draw menu title in centre
-                        spriteBatch.DrawString(titleFont, menuTitle, new Vector2(backBufferWidth / 2 - titleSize.X / 2, backBufferHeight / 2 - titleSize.Y / 2), titleColor);
-                        //then menu items wherever
-                        DrawMenuItems();
-                    }
-                    break;
-
-                case Position.TopLeft:
-                    if (menuItemsPosition == Position.UnderTitle)
-                    {
-                        //draw menu items and then title above them
-                        spriteBatch.DrawString(titleFont, menuTitle, new Vector2(padding, padding), titleColor);
-                        //centre left
-                        DrawMenuItems(new Vector2(padding, padding+titleSize.Y), Alignment.Left);
-                    }
-                    else
-                    {
-                        //draw menu title in top left
-                        spriteBatch.DrawString(titleFont, menuTitle, new Vector2(padding,padding), titleColor);
-                        //then menu items wherever
-                        DrawMenuItems();
-                    }
-                    break;
-
-                case Position.TopRight:
-                    if (menuItemsPosition == Position.UnderTitle)
-                    {
-                        //draw menu items and then title above them
-                        spriteBatch.DrawString(titleFont, menuTitle, new Vector2(backBufferWidth - padding - titleSize.X, padding), titleColor);
-                        //right align
-                        DrawMenuItems(new Vector2(backBufferWidth - menuArea.Width - padding, padding + titleSize.Y), Alignment.Right);
-                    }
-                    else
-                    {
-                        //draw menu title in top right
-                        spriteBatch.DrawString(titleFont, menuTitle, new Vector2(backBufferWidth - padding - titleSize.X, padding), titleColor);
-                        //then menu items wherever
-                        DrawMenuItems();
-                    }
-                    break;
-                default:
-                    break;
-            }
-            spriteBatch.End();
-        }
-
-        //draw menu items wherever(not under title)
-        public void DrawMenuItems()
-        {
-            int backBufferWidth = UnityEngine.Screen.width;
-            int backBufferHeight = UnityEngine.Screen.height;
-            Vector2 itemSize = titleFont.MeasureString(menuItems[0].menuItemName);
-            switch (menuItemsPosition)
-            {
-                case Position.BottomLeft:
-                    DrawMenuItems(new Vector2(padding, backBufferHeight - padding - menuArea.Height), Alignment.Left);
-                    break;
-                case Position.BottomRight:
-                    DrawMenuItems(new Vector2(backBufferWidth - padding - menuArea.Width, backBufferHeight - 40 - menuArea.Height), Alignment.Right);
-                    break;
-                case Position.Centre:
-                    DrawMenuItems(new Vector2(backBufferWidth/2-(menuArea.Width/2),(backBufferHeight/2)-(menuArea.Height/2)), Alignment.Centre);
-                    break;
-                case Position.TopLeft:
-                    DrawMenuItems(new Vector2(padding,padding), Alignment.Left);
-                    break;
-                case Position.TopRight:
-                    DrawMenuItems(new Vector2(backBufferWidth - padding - menuArea.Width, padding), Alignment.Right);
-                    break;
-            }
-        }
-
-
-        /// <summary>
-        /// Draws the menu items from the start point
-        /// with corresponding alignment
-        /// </summary>
-        /// <param name="startPoint">The top left corner of the menuArea</param>
-        /// <param name="align">the alignment. left =text against left side of the menuarea
-        /// right = text agains the right side of the menu area
-        /// centre = in the middle of the menu area</param>
-        private void DrawMenuItems(Vector2 startPoint, Alignment align)
-        {
-            Vector2 nextItemPosition = startPoint;
-            switch(align){
-                case Alignment.Left:
-                    for (int i = 0; i < menuItems.Count; i++)
-                    {
-                        if (i == currentlySelected)
-                        {
-                            spriteBatch.DrawString(activeFont, menuItems[i].menuItemName, nextItemPosition, activecolor);
-                        }
-                        else
-                        {
-                            spriteBatch.DrawString(inactiveFont, menuItems[i].menuItemName, nextItemPosition, inactiveColor);
-                        }
-                        nextItemPosition.Y = nextItemPosition.Y + lineSpacing+inactiveFont.MeasureString(menuItems[i].menuItemName).Y;
-                    }
-                    break;
-                case Alignment.Right:
-                    for (int i = 0; i < menuItems.Count; i++)
-                    {
-                        nextItemPosition.X = nextItemPosition.X + (menuArea.Width-inactiveFont.MeasureString(menuItems[i].menuItemName).X);
-                        if (i == currentlySelected)
-                        {
-                            spriteBatch.DrawString(activeFont, menuItems[i].menuItemName, nextItemPosition, activecolor);
-                        }
-                        else
-                        {
-                            spriteBatch.DrawString(inactiveFont, menuItems[i].menuItemName, nextItemPosition, inactiveColor);
-                        }
-                        nextItemPosition.Y = nextItemPosition.Y + lineSpacing + inactiveFont.MeasureString(menuItems[i].menuItemName).Y;
-                        nextItemPosition.X = startPoint.X;
-                    }
-                    break;
-                case Alignment.Centre:
-                    //throw new NotImplementedException();
-                    for (int i = 0; i < menuItems.Count; i++)
-                    {
-                        nextItemPosition.X = nextItemPosition.X + ((menuArea.Width - inactiveFont.MeasureString(menuItems[i].menuItemName).X) / 2);
-                        if (i == currentlySelected)
-                        {
-                            spriteBatch.DrawString(activeFont, menuItems[i].menuItemName, nextItemPosition, activecolor);
-                        }
-                        else
-                        {
-                            spriteBatch.DrawString(inactiveFont, menuItems[i].menuItemName, nextItemPosition, inactiveColor);
-                        }
-                        nextItemPosition.Y = nextItemPosition.Y + lineSpacing + inactiveFont.MeasureString(menuItems[i].menuItemName).Y;
-                        nextItemPosition.X = startPoint.X;
-                    }
-                    break;
-            }
-        }
-    */
     }
 }

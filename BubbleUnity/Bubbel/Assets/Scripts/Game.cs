@@ -16,7 +16,6 @@ namespace Bubbel_Shot
         private readonly Color TransparentBlack = new Color(0,0,0, 0);
 
         [SerializeField] private Sprite whitePixel;
-        [SerializeField] private GameMenu gameMenuPrefab;
         [SerializeField] private SpriteRenderer bubbelPrefab;
 
         private List<SpriteRenderer> bubbelGridVisuals = new();
@@ -30,7 +29,7 @@ namespace Bubbel_Shot
         private const int collisionTolerance = 31;
         private int leftSide = 200;
         private int rightSide = 600;
-        [SerializeField] private Vector2 scaleFactor = Vector2.one;
+        [SerializeField] private Vector3 scaleFactor = Vector3.one;
 
 
         //Game setup variables
@@ -38,46 +37,22 @@ namespace Bubbel_Shot
         private const float percentBlank = 0.1f;
 
         //the menus
-        GameMenu mainMenu;
-        ButtonMenu pauseMenu;
+        [SerializeField] private MenuController menuPrefab;
+        private MenuController menu;
         ButtonMenu nextLevelMenu;
-        ButtonMenu gameOverMenu;
 
-        //The various textures and fonts
-        Sprite pauseMenuImage; //PauseMenuBackground
-        Sprite pauseMenuExitButton; //PauseMenuExitButton
-        Sprite pauseMenuResumeButton; //PauseMenuResumeButton
-        Sprite backgroundTexture; //Background
-        Sprite foregroundTexture; //Frame
-        //TODO add foreground origins, drawing locations as calculated for playing field here
-        Vector2 leftAnchor = new Vector2(0, 0);
-        Vector2 rightAnchor = new Vector2(0, 0);
-
-        //todo should cannon be a separate/more self contained?
         [SerializeField] private GameObject rotatableCannonBody;
         [SerializeField] private SpriteRenderer bubbelInCannon;
-        
-        Sprite cursorTexture; //Cursor
+
+        [SerializeField] private MouseCursorStyleController mouseCursorControllerPrefab;
         Sprite currentModePanel; //CurrentModePanel
-        Sprite mainMenuButtonTexture; //MenuButton
         Sprite feedTexture; //Feed
         Sprite restartButtonTexture; //GameOverPlayAgainButton
         Sprite gameoverFailTexture; //GameOverFailure
         Sprite gameoverSuccessTexture; //GameOverSuccess
         
         //the point on the screen which the cannon spins around
-        private Vector2 cannonFulcrum = new Vector2(400, 525);
-        [SerializeField] private Transform cannonInstance;
-
-        //todo ensure cannon is drawn in precisely the correct place 
-        
-
-        //Mouse handlers
-        /*MouseHandler targettingMouseHandler;
-        MouseHandler leftSideMouseHandler;
-        MouseHandler rightSideMouseHandler;
-        MouseHandler menuMouseHandler;*/
-      
+        private Vector3 cannonFulcrum = new(400, 525, 0);
 
         CannonData cannonData;
         [SerializeField] private float keyboardAimSensitivity = 1f;
@@ -85,7 +60,6 @@ namespace Bubbel_Shot
         //game flow control
         bool onMainMenu = true;
         bool gameRunning = false;
-        bool gamePaused = false;
         bool shotFired = false;
         bool shotLanded = false;
         bool bubbelsPopping = false;
@@ -123,27 +97,20 @@ namespace Bubbel_Shot
         int topAlignedRight;
         private Color[,] playingField;
 
-        [SerializeField] private AudioSource cannonAudio;
+        [SerializeField] private AudioSource generalAudioSource;
         [SerializeField] private AudioSource bounceAudio;
 
         [SerializeField] private AudioClip popAudio;
-
-        GameButton mainMenuButton;
+        [SerializeField] private AudioClip slurpAudio;
 
         private void Awake()
         {
-            CreateButtons(); //todo replace with a canvas menu that can pause the game
             CreateParticleSystems();
-            CreateInGameMouse();
             //Create menus
-            CreatePauseMenu();
-            CreateMainMenu();
-            CreateGameOverMenu();
+            CreateMenu();
             CreateNextLevelMenu();
             //CreateGameFinishedMenu();
             CreateMenuMouse();
-            
-            CreateMenuItemsAndStuff();
             
             //set up mice. something means they have to set up after initialised. TODO
             InitialiseMouses();
@@ -154,52 +121,13 @@ namespace Bubbel_Shot
             PauseGame();
         }
 
-        private void CreateButtons()
-        {
-            var mainMenuButtonGO = new GameObject("mainMenuButton");
-            mainMenuButton = mainMenuButtonGO.AddComponent<GameButton>();
-            mainMenuButton.InitializeGameButton(PauseGame, new Rect(30, 510, 130, 50));
-        }
-
         private void CreateParticleSystems()
         {
             poppingParticleEngine = Instantiate(poppingParticleEnginePrefab, transform);
             fallingParticleEngine = Instantiate(fallingParticleEnginePrefab, transform);
         }
 
-        private void CreateInGameMouse()
-        {
-            //create targetting mouse
-            //todo mousey
-            /*
-            targettingMouseHandler = new MouseHandler(this);
-            Components.Add(targettingMouseHandler);
-
-            leftSideMouseHandler = new MouseHandler(this);
-            Components.Add(leftSideMouseHandler);
-
-            rightSideMouseHandler = new MouseHandler(this);
-            Components.Add(rightSideMouseHandler);
-            */
-
-        }
-
-        private void CreateMainMenu()
-        {
-            //create main menu
-            mainMenu = Instantiate(gameMenuPrefab);
-            mainMenu.menuTitle ="Bubbel";
-
-            //set menu items
-            mainMenu.AddMenuItem("New classic game", StartNewClassicGame);
-            mainMenu.AddMenuItem("Exit", ExitGame);
-
-            //Set background
-            mainMenu.SetBackground(whitePixel, new Color(1,1,1, 210f/255f));
-
-        }
-
-        private void ExitGame()
+        internal void ExitGame()
         {
             if(!Application.isEditor)
                 Application.Quit();
@@ -211,27 +139,10 @@ namespace Bubbel_Shot
 #endif
         }
 
-        private void CreatePauseMenu()
+        private void CreateMenu()
         {
-            var pauseMenuGO = new GameObject("Pause menu");
-            pauseMenu = pauseMenuGO.AddComponent<ButtonMenu>();
-            
-            //Set pause and resume methods
-            pauseMenu.SetPauseMethod(PauseGame);
-            pauseMenu.SetResumeMethod(ResumeGame);
-            pauseMenu.SetMenuHotkey(KeyCode.Escape);
-
-
-            //The buttons and menu texture are set after they are loaded in the load method.
-        }
-
-        private void CreateGameOverMenu()
-        {
-            var gameOverMenuGO = new GameObject("Game Over Menu");
-            gameOverMenu = gameOverMenuGO.AddComponent<ButtonMenu>();
-            gameOverMenu.SetMenuHotkey(KeyCode.None);
-            //Setup game over menu (accessed automatically when the game ends
-
+            menu = Instantiate(menuPrefab);
+            menu.CrosslinkWithGame(this);
         }
 
         private void CreateNextLevelMenu()
@@ -259,27 +170,15 @@ namespace Bubbel_Shot
 
         private void InitialiseMouses()
         {
-            /*
-            //setup targetting mouse
-            targettingMouseHandler.SetActiveRegion(new UnityEngine.Rect(leftSide, 0, rightSide - leftSide, screenHeight));
-            targettingMouseHandler.SetCursorMode(CursorMode.Crosshair);
-            targettingMouseHandler.AddMouseMovedAction(TargetWithMouse);
-            targettingMouseHandler.AddLeftClickAction(FireShotWithMouse);
-            targettingMouseHandler.Enable();
-
-            leftSideMouseHandler.SetActiveRegion(new UnityEngine.Rect(0, 0, leftSide, screenHeight));
-            leftSideMouseHandler.Enable();
-
-            rightSideMouseHandler.SetActiveRegion(new UnityEngine.Rect(rightSide, 0, screenWidth-rightSide, screenHeight));
-            rightSideMouseHandler.Enable();
-
-            menuMouseHandler.SetActiveRegion(new UnityEngine.Rect(0, 0, screenWidth, screenHeight));
-            */
+            //setup targeting mouse
+            var mouseCursorSyle = Instantiate(mouseCursorControllerPrefab, transform);
+            mouseFireControlRegion = new Rect(leftSide, 0, rightSide - leftSide, Screen.height);
+            mouseCursorSyle.SetCrosshairRegion(mouseFireControlRegion);
         }
 
         /// <summary>
         /// Generates a random field of balls
-        /// TODO - ensure no balls are left floating
+        /// TODO - ensure no balls are left floating  https://github.com/Bomadeno/Bubbel/issues/4
         /// </summary>
         private void GeneratePlayingField(int initialRowCount)
         {
@@ -307,46 +206,25 @@ namespace Bubbel_Shot
         }
 
 
-        private void PauseGame()
+        public void PauseGame()
         {
-            pauseMenu.ShowMenu();
             poppingParticleEngine.Pause();
-            //set mice correctly
-            /*menuMouseHandler.Enable();
-            targettingMouseHandler.Disable();
-            leftSideMouseHandler.Disable();
-            rightSideMouseHandler.Disable();*/
-
             gameRunning = false;
         }
 
-        private void ResumeGame()
+        public void ResumeGame()
         {
-            pauseMenu.HideMenu();
             poppingParticleEngine.Resume();
-            //set mice correctly
-            /*menuMouseHandler.Disable();
-            targettingMouseHandler.Enable();
-            leftSideMouseHandler.Enable();
-            rightSideMouseHandler.Enable();*/
-
             gameRunning = true;
         }
 
         public void GameOver(bool hasWon)
         {
-            pauseMenu.SetMenuHotkey(KeyCode.None);
             gameRunning = false;
-            gameOverMenu.SetBackground(null, 128, Color.white);
-            /*menuMouseHandler.Enable();
-            targettingMouseHandler.Disable();
-            leftSideMouseHandler.Disable();
-            rightSideMouseHandler.Disable();*/
 
             if (hasWon)
             {
-                gameOverMenu.SetBackground(gameoverSuccessTexture, 255, Color.green);
-                gameOverMenu.ShowMenu();
+                menu.Won();
             }
             else
             {
@@ -356,7 +234,7 @@ namespace Bubbel_Shot
 
         }
 
-        private void StartNewClassicGame()
+        public void StartNewClassicGame()
         {
             score = new Score();
 
@@ -375,8 +253,7 @@ namespace Bubbel_Shot
             bubbelsFalling = false;
             needToCheckColours = false;
 
-            gameOverMenu.HideMenu();
-            pauseMenu.HideMenu();
+            menu.GetReadyToStart();
 
             //Setup initial available colours
             List<Color> sensibleColours = new List<Color>();
@@ -424,49 +301,50 @@ namespace Bubbel_Shot
         }
 
 
-        private void TargetWithMouse(Vector2 target)
+        private Vector3 lastMousePosition;
+        private Rect mouseFireControlRegion;
+
+        private void TargetWithMouse()
         {
-            Vector2 fulcrumToMouse = cannonFulcrum - target;
-            cannonData.Angle = -1 * (float)Math.Atan(fulcrumToMouse.x / fulcrumToMouse.y);
-            if (cannonData.Angle < -1.1)
-                cannonData.Angle = -1.1f;
-            if (cannonData.Angle > 1.1)
-                cannonData.Angle = 1.1f;
+            if (lastMousePosition == Input.mousePosition)
+            {
+                //other input methods rule!
+                return;
+            }
+            
+            //todo this is broken
+            lastMousePosition = Input.mousePosition;
+            Vector3 fulcrumToMouse = cannonFulcrum - lastMousePosition;
+            cannonData.AngleInRadians = -1 * (float)Math.Atan(fulcrumToMouse.x / fulcrumToMouse.y);
+            if (cannonData.AngleInRadians < -1.1)
+                cannonData.AngleInRadians = -1.1f;
+            if (cannonData.AngleInRadians > 1.1)
+                cannonData.AngleInRadians = 1.1f;
         }
 
-        private void FireShotWithMouse(Vector2 mousePoint)
-        {
-            if (!shotFired && !shotLanded && !bubbelsPopping && !bubbelsFalling && !shotReloading)
-            {
-                Vector2 fulcrumToMouse = cannonFulcrum - mousePoint;
-                cannonData.Angle = -1 * (float)Math.Atan(fulcrumToMouse.x / fulcrumToMouse.y);
-                if (cannonData.Angle < -1.1)
-                    cannonData.Angle = -1.1f;
-                if (cannonData.Angle > 1.1)
-                    cannonData.Angle = 1.1f;
-                FireShot();
-            }
-        }
 
         /// <summary>
         /// Fires a shot from the current cannon angle
         /// </summary>
         private void FireShot()
         {
+            if (shotFired || shotLanded || bubbelsPopping || bubbelsFalling || shotReloading) return;
+            
             //calculate the shot direction from the cannon angle
             //-90 gives 0 as the upwards angle
-            float shotAngle = cannonData.Angle + Mathf.Deg2Rad * -90;
+            float shotAngle = cannonData.AngleInRadians + Mathf.Deg2Rad * -90;
             shotDirection = new Vector2((float)Math.Cos(shotAngle) * shotSpeed, (float)Math.Sin(shotAngle) * shotSpeed);
             //start shot from cannon centre
             shotLocation = cannonFulcrum;
             //set colour of current ball to that of the cannon
             shotColor = cannonData.currentBallColor;
-            cannonAudio.Play();
+            generalAudioSource.Play();
 
             //load next shot into cannon
             LoadNextShot();
 
             shotFired = true;
+
         }
 
         /// <summary>
@@ -565,6 +443,7 @@ namespace Bubbel_Shot
             {
                 playingField[j, i] = shotColor;
                 justAddedBubbel = new Point(j, i);
+                generalAudioSource.PlayOneShot(slurpAudio);
                 //todo play "slurp into field" effect
             }
             else
@@ -586,32 +465,8 @@ namespace Bubbel_Shot
             
         }
 
-
-        private void CreateMenuItemsAndStuff()
-        {
-            //Set menu items
-            pauseMenu.AddMenuItem(new MenuButton("Resume", pauseMenuResumeButton, new Rect(330, 250, 140, 50), ResumeGame));
-            pauseMenu.AddMenuItem(new MenuButton("Exit", pauseMenuExitButton, new Rect(330, 320, 140, 50), ExitGame));
-
-
-            gameOverMenu.AddMenuItem(new MenuButton("Resume", restartButtonTexture, new Rect(330, 250, 140, 50), StartNewClassicGame));
-            gameOverMenu.AddMenuItem(new MenuButton("Exit", pauseMenuExitButton, new Rect(330, 320, 140, 50), ExitGame));
-
-            //Set pause menu background
-            pauseMenu.SetBackground(pauseMenuImage, 255, Color.white);
-
-            mainMenuButton.SetButtonImage(mainMenuButtonTexture);
-        }
-
         protected void Update()
         {
-            // Allows the game to exit
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                ExitGame();
-            }
-
-
             if (onMainMenu)
             {
                 onMainMenu = false;
@@ -622,6 +477,7 @@ namespace Bubbel_Shot
                 if (gameRunning)
                 {
                     ProcessKeyboard(Time.deltaTime);
+                    //TargetWithMouse(); -commented out awaiting proper mouse support
                     UpdateShot();
                     PostShotLandingProcessing();
                     AnimateBubbelsPopping();
@@ -646,21 +502,28 @@ namespace Bubbel_Shot
         {
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                cannonData.Angle -= keyboardAimSensitivity * deltaTime;
-                if (cannonData.Angle < -1.1)
-                    cannonData.Angle = -1.1f;
+                cannonData.AngleInRadians -= keyboardAimSensitivity * deltaTime;
+                if (cannonData.AngleInRadians < -1.1)
+                    cannonData.AngleInRadians = -1.1f;
             }
             if (Input.GetKey(KeyCode.RightArrow))
             {
-                cannonData.Angle += keyboardAimSensitivity * deltaTime;
-                if (cannonData.Angle > 1.1)
-                    cannonData.Angle = 1.1f;
+                cannonData.AngleInRadians += keyboardAimSensitivity * deltaTime;
+                if (cannonData.AngleInRadians > 1.1)
+                    cannonData.AngleInRadians = 1.1f;
             }
-            if (Input.GetKeyDown(KeyCode.Space) && !shotFired && !shotLanded && !bubbelsPopping && !bubbelsFalling)
+            if ((Input.GetKeyDown(KeyCode.Space) || IsClickValidToFireShot())  && !shotFired && !shotLanded && !bubbelsPopping && !bubbelsFalling)
             {
                 FireShot();
             }
+
+            bool IsClickValidToFireShot()
+            {
+                return Input.GetMouseButtonDown(0) & mouseFireControlRegion.Contains(Input.mousePosition);
+            }
         }
+        
+        
 
         /// <summary>
         /// when shot is fired, update shot updates the shot's location,
@@ -962,7 +825,7 @@ namespace Bubbel_Shot
             {
                 if (poppingBubbels.currentlyPoppingProgress == 0)
                 {
-                    cannonAudio.PlayOneShot(popAudio);
+                    generalAudioSource.PlayOneShot(popAudio);
 
                     //add to score
                     int scoreForThisBubbel = score.Pop();
@@ -1263,7 +1126,9 @@ namespace Bubbel_Shot
         private void UpdateCannon()
         {
             //Port note: the gameobject should consist of frame -> background -> ball -> foreground. The cannon fore should be wheat color,  new Color(0.96f, 0.87f, 0.7f), #F5DEB3
-            cannonInstance.position = (cannonFulcrum-new Vector2(30,0)) * scaleFactor;
+            
+            //todo ensure cannon and background are drawn in precisely the correct place  https://github.com/Bomadeno/Bubbel/issues/5
+            //cannonInstance.position = (cannonFulcrum-new Vector3(30,0, 0)) * scaleFactor;
             
             //Fade bubbel into cannon. the bubbel spins in the cannon.
             if (shotReloading)
@@ -1278,7 +1143,7 @@ namespace Bubbel_Shot
                 bubbelInCannon.color = cannonData.currentBallColor;
                 bubbelInCannon.transform.localRotation = Quaternion.Euler(0, 0, cannonData.currentBallRotation);
             }
-            rotatableCannonBody.transform.rotation = Quaternion.Euler(0, 0, -cannonData.Angle * Mathf.Rad2Deg);
+            rotatableCannonBody.transform.rotation = Quaternion.Euler(0, 0, -cannonData.AngleInRadians * Mathf.Rad2Deg);
         }
 
         

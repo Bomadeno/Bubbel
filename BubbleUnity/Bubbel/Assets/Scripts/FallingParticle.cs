@@ -12,7 +12,6 @@ namespace Bubbel_Shot
         //public float orientation;
         //public int particleScore;
         [SerializeField] private float terminalVelocity = 15;
-        //todo add randomness to drop
         private SpriteRenderer mySprite;
 
         private void Awake()

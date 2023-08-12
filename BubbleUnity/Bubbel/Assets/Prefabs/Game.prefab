@@ -45,11 +45,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   whitePixel: {fileID: 21300000, guid: 5094d61377ed21142b07ce52ba363076, type: 3}
-  gameMenuPrefab: {fileID: 2087930527949689740, guid: c02c5f963a6c82342ada7ac0ff42febc, type: 3}
   bubbelPrefab: {fileID: 2152340156970543156, guid: f6547805f5eb65c45bd1c6d334691518, type: 3}
-  scaleFactor: {x: 0.01, y: -0.01}
+  scaleFactor: {x: 0.01, y: -0.01, z: 1}
+  menuPrefab: {fileID: 3447867237926487128, guid: 513e6f8d034828445a714d7ca42008f6, type: 3}
   rotatableCannonBody: {fileID: 0}
   bubbelInCannon: {fileID: 0}
+  mouseCursorControllerPrefab: {fileID: 6108391328291111290, guid: 28cb4dccc1e3c34469d5ef66960fcbdd, type: 3}
+  keyboardAimSensitivity: 1
   scoreDisplay: {fileID: 0}
   fallingParticleEnginePrefab: {fileID: 2526065282689829556, guid: 10fa52e97c160404f9e45f34caf5c3cb, type: 3}
   poppingParticleEnginePrefab: {fileID: 7954332377960835482, guid: fe2b4a2996e6d6b4dbbe9410b41ddaa0, type: 3}
+  generalAudioSource: {fileID: 0}
+  bounceAudio: {fileID: 0}
+  popAudio: {fileID: 8300000, guid: 5e1846c2606d85b42b50aead0dbcbf62, type: 3}
+  slurpAudio: {fileID: 8300000, guid: c7300d228c59bae40857d0169ab4a826, type: 3}

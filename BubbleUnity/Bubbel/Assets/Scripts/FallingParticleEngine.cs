@@ -40,7 +40,7 @@ namespace Bubbel_Shot
 
         public void Update()
         {
-            //todo should pool them, and dispose of them properly
+            //todo should pool them, and dispose of them properly https://github.com/Bomadeno/Bubbel/issues/3
             for (int i = fallingParticles.Count - 1; i >= 0; i--)
             {
                 //remove any dead particles

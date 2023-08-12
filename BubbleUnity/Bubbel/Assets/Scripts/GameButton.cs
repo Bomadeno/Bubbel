@@ -11,11 +11,6 @@ namespace MattsButtonLibrary
         private UnityEngine.Sprite buttonTexture;
         private ButtonClickAction buttonClickAction;
         private bool mouseIsOverButton;
-        //button mode (pressed down, indented, etc)
-        //checkbox button?
-        //togglebutton?
-        //TODO add 'mouse down mouse up' behaviour so buttons can be unclicked
-        //add mouseover events (and other events)
 
 
         /// <summary>      

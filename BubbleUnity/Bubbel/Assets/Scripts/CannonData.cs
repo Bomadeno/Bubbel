@@ -5,7 +5,7 @@ namespace Bubbel_Shot
 {
     public struct CannonData
     {
-        public float Angle;
+        public float AngleInRadians;
         public Color currentBallColor;
         public float currentBallRotation;
         public List<Color> nextFiveShots;
