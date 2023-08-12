@@ -34,6 +34,7 @@ namespace Bubbel_Shot
         private const int collisionTolerance = 31;
         private int leftSide = 200;
         private int rightSide = 600;
+        [SerializeField] private Vector2 scaleFactor = Vector2.one;
 
 
         //Game setup variables
@@ -1180,7 +1181,7 @@ namespace Bubbel_Shot
 
         private Vector2 VectorFromPoint(int j, int i)
         {
-            return new Vector2(j * (ballWidth + horizontalPadding) + leftSide + leftPadding + (halfBallWidth * ((i + topAlignedRight) % 2)), i * rowSpacing);
+            return new Vector2((j * (ballWidth + horizontalPadding) + leftSide + leftPadding + halfBallWidth * ((i + topAlignedRight) % 2)) * scaleFactor.x, i * rowSpacing * scaleFactor.y);
         }
     
 
