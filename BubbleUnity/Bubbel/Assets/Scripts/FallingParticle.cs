@@ -11,7 +11,7 @@ namespace Bubbel_Shot
         public Color color;
         //public float orientation;
         //public int particleScore;
-        private const float terminalVelocity = 15;
+        [SerializeField] private float terminalVelocity = 15;
         //todo add randomness to drop
         private SpriteRenderer mySprite;
 

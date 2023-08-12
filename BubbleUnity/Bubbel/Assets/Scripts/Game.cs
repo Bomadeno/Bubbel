@@ -29,7 +29,7 @@ namespace Bubbel_Shot
 
         //Playing field layout
         private int ballWidth = 36;
-        private int halfBallWidth = 18;
+        private int halfBallWidth => ballWidth / 2;
         private int leftPadding = 2;
         private int horizontalPadding = 2;
         private int rowSpacing = 34;
@@ -77,10 +77,7 @@ namespace Bubbel_Shot
         //the point on the screen which the cannon spins around
         private Vector2 cannonFulcrum = new Vector2(400, 525);
 
-        private Vector2 zeroOrigin = new Vector2(0, 0);
-        private Vector2 cannonFrameOrigin = new Vector2(86, 82);
-        private Vector2 cannonBodyOrigin = new Vector2(28, 90);
-        private Vector2 bubbelOrigin = new Vector2(18, 18);
+        //todo ensure cannon is drawn in precisely the correct place 
         
 
         //Mouse handlers
@@ -514,7 +511,7 @@ namespace Bubbel_Shot
 
             //check for collisions with the top of the screen
 
-            if (shotLocation.y < 18)
+            if (shotLocation.y < halfBallWidth)
             {
                 return true;
             }
@@ -527,8 +524,8 @@ namespace Bubbel_Shot
                     //For each bubble position in the gameboard that is not null
                     if (playingField[j, i] != TransparentBlack)
                     {
-                        focusBall = new Vector2(j * (36 + horizontalPadding) + leftSide + leftPadding + (18 * ((i + topAlignedRight) % 2)), y);
-                        focusBall += new Vector2(18, 18);
+                        focusBall = new Vector2(j * (ballWidth + horizontalPadding) + leftSide + leftPadding + (halfBallWidth * ((i + topAlignedRight) % 2)), y);
+                        focusBall += new Vector2(halfBallWidth, halfBallWidth);
                         distance = shotLocation - focusBall;
                         if (distance.magnitude < collisionTolerance)
                         {
@@ -551,7 +548,7 @@ namespace Bubbel_Shot
             //get the 'y' row
             int i = (int)Math.Floor(shotLocation.y / rowSpacing);
             //get the 'x' column
-            int j = (int)Math.Floor((shotLocation.x - 18 * ((i + topAlignedRight) % 2) - leftPadding - leftSide)) / (36 + horizontalPadding);
+            int j = (int)Math.Floor((shotLocation.x - halfBallWidth * ((i + topAlignedRight) % 2) - leftPadding - leftSide)) / (ballWidth + horizontalPadding);
 
             if (i >= playingField.GetLength(1))
                 i = playingField.GetLength(1) - 1;
@@ -568,11 +565,11 @@ namespace Bubbel_Shot
                 //move bubbel backwards and try again
                 shotLocation -= shotDirection;
 
-                if (shotLocation.x < leftSide + 18)
+                if (shotLocation.x < leftSide + halfBallWidth)
                 {
                     shotDirection.x *= -1;
                 }
-                else if (shotLocation.x > rightSide - 18)
+                else if (shotLocation.x > rightSide - halfBallWidth)
                 {
                     shotDirection.x *= -1;
                 }
@@ -676,12 +673,12 @@ namespace Bubbel_Shot
             {
                 shotLocation = shotDirection + shotLocation;
                 //if shot is to the left of the play area, invert x
-                if (shotLocation.x < leftSide + 18)
+                if (shotLocation.x < leftSide + halfBallWidth)
                 {
                     BounceOffWall();
                 }
                 //if shot is to the right of the play area, invert x
-                else if (shotLocation.x > rightSide - 18)
+                else if (shotLocation.x > rightSide - halfBallWidth)
                 {
                     BounceOffWall();
                 }
@@ -834,7 +831,7 @@ namespace Bubbel_Shot
                     {
                         score.numberDropped++;
                         fallingBubbels.points.Add(new Point(j, i));
-                        fallingBubbels.positions.Add(VectorFromPoint(j, i));
+                        fallingBubbels.positions.Add(WorldVectorFromGridPoint(j, i));
                         fallingBubbels.color.Add(playingField[j, i]);
                     }
                 }
@@ -976,7 +973,7 @@ namespace Bubbel_Shot
                     poppingBubbels.currentlyPoppingProgress = 0;
                     poppingBubbels.currentlyPopping = poppingBubbels.points[next];
                     poppingBubbels.currentlyPoppingColor = poppingBubbels.colours[next];
-                    poppingParticleEngine.AddBubbel(VectorFromPoint(poppingBubbels.currentlyPopping), poppingBubbels.currentlyPoppingColor, scoreForThisBubbel);
+                    poppingParticleEngine.AddBubbel(WorldVectorFromGridPoint(poppingBubbels.currentlyPopping), poppingBubbels.currentlyPoppingColor, scoreForThisBubbel);
                     poppingBubbels.points.RemoveAt(next);
                     poppingBubbels.colours.RemoveAt(next);
                 }
@@ -1178,14 +1175,14 @@ namespace Bubbel_Shot
         }
         
         
-        private Vector2 VectorFromPoint(Point point)
+        private Vector2 WorldVectorFromGridPoint(Point point)
         {
-            return VectorFromPoint(point.X, point.Y);
+            return WorldVectorFromGridPoint(point.X, point.Y);
         }
 
-        private Vector2 VectorFromPoint(int j, int i)
+        private Vector2 WorldVectorFromGridPoint(int j, int i)
         {
-            return new Vector2((j * (ballWidth + horizontalPadding) + leftSide + leftPadding + halfBallWidth * ((i + topAlignedRight) % 2)) * scaleFactor.x, i * rowSpacing * scaleFactor.y);
+            return new Vector2(j * (ballWidth + horizontalPadding) + leftSide + leftPadding + halfBallWidth * ((i + topAlignedRight) % 2), i * rowSpacing) * scaleFactor;
         }
     
 
@@ -1242,13 +1239,13 @@ namespace Bubbel_Shot
             var bubbel = Instantiate(bubbelPrefab, position, Quaternion.identity);
             bubbel.color = bubbelColor;
             //draw on top of background. not the best approach but it'll do
-            bubbel.sortingOrder = 5;
+            bubbel.sortingOrder = 2;
             bubbelGridVisuals.Add(bubbel);
         }
 
         private void DrawSingleBubbelAtPoint(int j, int i, Color bubbelColor)
         {
-            DrawSingleBubbelInWorld(VectorFromPoint(j, i), bubbelColor);
+            DrawSingleBubbelInWorld(WorldVectorFromGridPoint(j, i), bubbelColor);
         }
 
         private void DrawPoppingBubbels()
@@ -1288,6 +1285,7 @@ namespace Bubbel_Shot
         
         private void DrawQueue()
         {
+            //todo all bubbels in queue should be drawn from 18,18 (halfBallWidth)
 
             if (shotReloading)
             {
@@ -1346,8 +1344,8 @@ namespace Bubbel_Shot
         {
             if (shotFired)
             {
-                //todo may need to offset by -18,-18*scale for pivot
-                DrawSingleBubbelInWorld(shotLocation * scaleFactor, shotColor);
+                //offset so middle of bubbel = pivot
+                DrawSingleBubbelInWorld((shotLocation - new Vector2(halfBallWidth,halfBallWidth)) * scaleFactor, shotColor);
             }
         }
 

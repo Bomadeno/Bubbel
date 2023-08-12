@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Bubbel_Shot
 {
-    public class PoppingParticleEngine : UnityEngine.MonoBehaviour
+    public class PoppingParticleEngine : MonoBehaviour
     {
         public List<PoppingBubbelParticle> bubbelParticles;
 
-        [UnityEngine.SerializeField] private PoppingBubbelParticle poppingBubbelPrefab;
+        [SerializeField] private PoppingBubbelParticle poppingBubbelPrefab;
 
 
         private void Awake()
@@ -31,27 +32,21 @@ namespace Bubbel_Shot
             enabled = true;
         }
 
-        public void AddBubbel(UnityEngine.Vector2 position, UnityEngine.Color color, int score)
+        public void AddBubbel(Vector2 position, Color color, int score)
         {
-            //todo pop in the right place!
-            var newOne = Instantiate(poppingBubbelPrefab);
+            var newOne = Instantiate(poppingBubbelPrefab, position, Quaternion.identity, transform);
             newOne.InitializePoppingBubbelParticle(color, score);
             bubbelParticles.Add(newOne);
         }
 
         public void Update()
         {
-            if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.Space))
-            {
-                AddBubbel(UnityEngine.Vector2.zero, UnityEngine.Color.magenta, 0);
-            }
-            
             if (enabled)
             {
                 for (int i = bubbelParticles.Count - 1; i >= 0; i--)
                 {
                     //age all particles
-                    bubbelParticles[i].currentLife+= UnityEngine.Time.deltaTime;
+                    bubbelParticles[i].currentLife+= Time.deltaTime;
                     //remove any dead particles
                     if (bubbelParticles[i].currentLife > bubbelParticles[i].lifeSpan)
                     {

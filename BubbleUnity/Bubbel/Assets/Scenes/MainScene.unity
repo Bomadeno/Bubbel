@@ -402,8 +402,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 4.4
-  m_fontSizeBase: 4.4
+  m_fontSize: 3.18
+  m_fontSizeBase: 3.18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -527,7 +527,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3619534728836742210, guid: 77972e678de1e144b8d919cde7f52f16, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.9
+      value: 3.8
       objectReference: {fileID: 0}
     - target: {fileID: 3619534728836742210, guid: 77972e678de1e144b8d919cde7f52f16, type: 3}
       propertyPath: m_LocalPosition.y
@@ -568,6 +568,14 @@ PrefabInstance:
     - target: {fileID: 3619534728836742211, guid: 77972e678de1e144b8d919cde7f52f16, type: 3}
       propertyPath: m_Name
       value: Cannon
+      objectReference: {fileID: 0}
+    - target: {fileID: 3619534729041221779, guid: 77972e678de1e144b8d919cde7f52f16, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.26999998
+      objectReference: {fileID: 0}
+    - target: {fileID: 3619534730107124734, guid: 77972e678de1e144b8d919cde7f52f16, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.27
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 77972e678de1e144b8d919cde7f52f16, type: 3}
@@ -634,6 +642,10 @@ PrefabInstance:
       propertyPath: rotatableCannonBody
       value: 
       objectReference: {fileID: 391463299}
+    - target: {fileID: 7701240387459267850, guid: eef3d4c51de86c74aa313e4bb811a054, type: 3}
+      propertyPath: keyboardAimSensitivity
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7701240387459267851, guid: eef3d4c51de86c74aa313e4bb811a054, type: 3}
       propertyPath: m_Name
       value: Game
