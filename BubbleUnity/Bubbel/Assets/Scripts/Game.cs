@@ -6,13 +6,12 @@ using ClickableMenu;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = System.Random;
 
 namespace Bubbel_Shot
 {
     /// <summary>
-    /// Bubbel need sto be in 800x600. Old times! So the cannon in the middle is at x= 400. XNA 0,0 is TOP LEFT.
+    /// Bubbel needs to be in 800x600. Old times! So the cannon in the middle is at x= 400. XNA 0,0 is TOP LEFT.
     /// </summary>
     public class Game : MonoBehaviour
     {
@@ -62,10 +61,7 @@ namespace Bubbel_Shot
         //todo should cannon be a separate/more self contained?
         [SerializeField] private GameObject rotatableCannonBody;
         [SerializeField] private SpriteRenderer bubbelInCannon;
-        Sprite cannonFrame; //CannonFrame
-        Sprite cannonBodyFore; //CannonBodyFore
-        Sprite cannonBodyBack; //CannonBodyBack
-        Sprite bubbelTexture; //Bubbel
+        
         Sprite cursorTexture; //Cursor
         Sprite currentModePanel; //CurrentModePanel
         Sprite mainMenuButtonTexture; //MenuButton
@@ -76,6 +72,7 @@ namespace Bubbel_Shot
         
         //the point on the screen which the cannon spins around
         private Vector2 cannonFulcrum = new Vector2(400, 525);
+        [SerializeField] private Transform cannonInstance;
 
         //todo ensure cannon is drawn in precisely the correct place 
         
@@ -131,6 +128,10 @@ namespace Bubbel_Shot
         int topAlignedRight;
         private Color[,] playingField;
 
+        [SerializeField] private AudioSource cannonAudio;
+        [SerializeField] private AudioSource bounceAudio;
+
+        [SerializeField] private AudioClip popAudio;
 
         GameButton mainMenuButton;
 
@@ -467,8 +468,7 @@ namespace Bubbel_Shot
             shotLocation = cannonFulcrum;
             //set colour of current ball to that of the cannon
             shotColor = cannonData.currentBallColor;
-            //todo play "cannon" sound
-            //soundBank.PlayCue("cannon");
+            cannonAudio.Play();
 
             //load next shot into cannon
             LoadNextShot();
@@ -492,11 +492,24 @@ namespace Bubbel_Shot
         /// Changes the shot direction as if it bounced off a vertical wall
         /// Also plays a bounce sound effect.
         /// </summary>
-        private void BounceOffWall()
+        private void BounceOffWall(AudioSide side)
         {
             shotDirection.x *= -1;
-            //TODO - play bounce sound effect
-            //soundBank.PlayCue("bounce");
+            switch (side)
+            {
+                case AudioSide.None:
+                    bounceAudio.panStereo = 0;
+                    break;
+                case AudioSide.Left:
+                    bounceAudio.panStereo = -1;
+                    break;
+                case AudioSide.Right:
+                    bounceAudio.panStereo = 1;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
+            }
+            bounceAudio.Play();
         }
 
         /// <summary>
@@ -559,6 +572,7 @@ namespace Bubbel_Shot
             {
                 playingField[j, i] = shotColor;
                 justAddedBubbel = new Point(j, i);
+                //todo play "slurp into field" effect
             }
             else
             {
@@ -596,14 +610,6 @@ namespace Bubbel_Shot
             mainMenuButton.SetButtonImage(mainMenuButtonTexture);
         }
 
-        
-
-
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected void Update()
         {
             // Allows the game to exit
@@ -675,12 +681,12 @@ namespace Bubbel_Shot
                 //if shot is to the left of the play area, invert x
                 if (shotLocation.x < leftSide + halfBallWidth)
                 {
-                    BounceOffWall();
+                    BounceOffWall(AudioSide.Left);
                 }
                 //if shot is to the right of the play area, invert x
                 else if (shotLocation.x > rightSide - halfBallWidth)
                 {
-                    BounceOffWall();
+                    BounceOffWall(AudioSide.Right);
                 }
 
                 if (ShotCollided())
@@ -963,8 +969,7 @@ namespace Bubbel_Shot
             {
                 if (poppingBubbels.currentlyPoppingProgress == 0)
                 {
-                    //todo play pop1
-                    //soundBank.PlayCue("pop1");
+                    cannonAudio.PlayOneShot(popAudio);
 
                     //add to score
                     int scoreForThisBubbel = score.Pop();
@@ -1200,7 +1205,7 @@ namespace Bubbel_Shot
                 UpdateBallField();
                 DrawPoppingBubbels();
                 
-                DrawCannon();
+                UpdateCannon();
                 DrawQueue();
                 DrawShot();
                 DrawScore();
@@ -1262,9 +1267,10 @@ namespace Bubbel_Shot
         }
 
 
-        private void DrawCannon()
+        private void UpdateCannon()
         {
             //Port note: the gameobject should consist of frame -> background -> ball -> foreground. The cannon fore should be wheat color,  new Color(0.96f, 0.87f, 0.7f), #F5DEB3
+            cannonInstance.position = (cannonFulcrum-new Vector2(30,0)) * scaleFactor;
             
             //Fade bubbel into cannon. the bubbel spins in the cannon.
             if (shotReloading)
