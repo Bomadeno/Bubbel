@@ -761,6 +761,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7701240387459267850, guid: eef3d4c51de86c74aa313e4bb811a054, type: 3}
+      propertyPath: popAudio
+      value: 
+      objectReference: {fileID: 8300000, guid: 5e1846c2606d85b42b50aead0dbcbf62, type: 3}
+    - target: {fileID: 7701240387459267850, guid: eef3d4c51de86c74aa313e4bb811a054, type: 3}
       propertyPath: bounceAudio
       value: 
       objectReference: {fileID: 114577205}

@@ -4,9 +4,7 @@ using MattsMenuLibrary;
 using MattsButtonLibrary;
 using ClickableMenu;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using Random = System.Random;
 
 namespace Bubbel_Shot
 {
@@ -22,9 +20,6 @@ namespace Bubbel_Shot
         [SerializeField] private SpriteRenderer bubbelPrefab;
 
         private List<SpriteRenderer> bubbelGridVisuals = new();
-        
-        //'Game' variables
-        Random random = new Random();
 
         //Playing field layout
         private int ballWidth = 36;
@@ -137,15 +132,14 @@ namespace Bubbel_Shot
 
         private void Awake()
         {
-            CreateButtons();
+            CreateButtons(); //todo replace with a canvas menu that can pause the game
             CreateParticleSystems();
             CreateInGameMouse();
             //Create menus
-            //CreatePauseMenu(); //PMM
             CreatePauseMenu();
             CreateMainMenu();
             CreateGameOverMenu();
-            //CreateNextLevelMenu();
+            CreateNextLevelMenu();
             //CreateGameFinishedMenu();
             CreateMenuMouse();
             
@@ -243,7 +237,7 @@ namespace Bubbel_Shot
         private void CreateNextLevelMenu()
         {
             var nextLevelMenuGO = new GameObject("Next Level");
-            nextLevelMenu = nextLevelMenu.AddComponent<ButtonMenu>();
+            nextLevelMenu = nextLevelMenuGO.AddComponent<ButtonMenu>();
             nextLevelMenu.SetMenuHotkey(KeyCode.None);
 
             //The buttons and menu texture are set after they are loaded in the load method.
@@ -261,7 +255,6 @@ namespace Bubbel_Shot
         private void Start()
         {
             StartNewClassicGame();
-
         }
 
         private void InitialiseMouses()
@@ -303,10 +296,10 @@ namespace Bubbel_Shot
         {
             for (int j = 0; j < 10; j++)
             {
-                int x = random.Next(availableColours.Count);
+                int x = UnityEngine.Random.Range(0, availableColours.Count);
                 playingField[j, rowNumber] = availableColours[x];
                 //makes a certain percentage of the slots empty
-                if (random.NextDouble() < percentBlank)
+                if (UnityEngine.Random.Range(0f,1f) < percentBlank)
                 {
                     playingField[j, rowNumber] = TransparentBlack;
                 }
@@ -397,12 +390,12 @@ namespace Bubbel_Shot
             sensibleColours.Add(new Color(0.5f,0f,0.25f));
 
             availableColours = new List<Color>();
-            for (int i = 0; i < settings.NumberOfDifferentBallColours; i++)
+            for (int i = 0; i < settings.NumberOfDifferentBallColours && i < sensibleColours.Count; i++)
             {
-                int sensibleIndex = random.Next(0, sensibleColours.Count-1);
+                int sensibleIndex = UnityEngine.Random.Range(0, sensibleColours.Count);
                 while (availableColours.Contains(sensibleColours[sensibleIndex]))
                 {
-                    sensibleIndex = random.Next(0, sensibleColours.Count-1);
+                    sensibleIndex = UnityEngine.Random.Range(0, sensibleColours.Count);
                 }
                 availableColours.Add(sensibleColours[sensibleIndex]);
             }
@@ -414,7 +407,7 @@ namespace Bubbel_Shot
 
             //set up cannon
             cannonData = new CannonData();
-            cannonData.currentBallColor = availableColours[random.Next(availableColours.Count)];
+            cannonData.currentBallColor = availableColours[UnityEngine.Random.Range(0, availableColours.Count)];
             cannonData.nextFiveShotLocation = new Vector2[5];
             cannonData.nextFiveShotLocation[0] = new Vector2(618, 568);
             cannonData.nextFiveShotLocation[1] = new Vector2(658, 568);
@@ -426,7 +419,7 @@ namespace Bubbel_Shot
             cannonData.nextFiveShots = new List<Color>();
             for (int i = 0; i < 5; i++)
             {
-                cannonData.nextFiveShots.Add(availableColours[random.Next(availableColours.Count)]);
+                cannonData.nextFiveShots.Add(availableColours[UnityEngine.Random.Range(0, availableColours.Count)]);
             }
         }
 
@@ -485,7 +478,7 @@ namespace Bubbel_Shot
             shotReloading = true;
             cannonData.currentBallColor = cannonData.nextFiveShots[0];
             cannonData.nextFiveShots.RemoveAt(0);
-            cannonData.nextFiveShots.Add(availableColours[random.Next(availableColours.Count)]);
+            cannonData.nextFiveShots.Add(availableColours[UnityEngine.Random.Range(0, availableColours.Count)]);
         }
 
         /// <summary>
@@ -974,7 +967,7 @@ namespace Bubbel_Shot
                     //add to score
                     int scoreForThisBubbel = score.Pop();
 
-                    int next = random.Next(poppingBubbels.points.Count - 1);
+                    int next = UnityEngine.Random.Range(0, poppingBubbels.points.Count);
                     poppingBubbels.currentlyPoppingProgress = 0;
                     poppingBubbels.currentlyPopping = poppingBubbels.points[next];
                     poppingBubbels.currentlyPoppingColor = poppingBubbels.colours[next];
@@ -1085,7 +1078,7 @@ namespace Bubbel_Shot
                 if (cannonData.nextFiveShots[i] == color)
                 {
                     cannonData.nextFiveShots.RemoveAt(i);
-                    cannonData.nextFiveShots.Add(availableColours[random.Next(availableColours.Count)]);
+                    cannonData.nextFiveShots.Add(availableColours[UnityEngine.Random.Range(0, availableColours.Count)]);
                 }
             }
 
