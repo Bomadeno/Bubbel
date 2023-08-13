@@ -3,7 +3,7 @@ Bubbel is a "bubbel shooter" clone, with a focus on ironing out some annoyances 
 
 ## Getting started
 
-In the main branch (Unity version), simply open the project in Unity, open the scene (MainScene) and hit play. Everything should just work. Using Unity version 2021-3-6f1
+In the main branch (Unity version), simply open the project in Unity, open the scene (MainScene) and hit play. Everything should just work. Using Unity version 2022-3-7f1
 
 The game is played with cursor keys to aim and spacebar to fire a Bubbel.
 
