@@ -39,7 +39,6 @@ namespace Bubbel_Shot
         //the menus
         [SerializeField] private MenuController menuPrefab;
         private MenuController menu;
-        ButtonMenu nextLevelMenu;
 
         [SerializeField] private GameObject rotatableCannonBody;
         [SerializeField] private SpriteRenderer bubbelInCannon;
@@ -47,9 +46,6 @@ namespace Bubbel_Shot
         [SerializeField] private MouseCursorStyleController mouseCursorControllerPrefab;
         Sprite currentModePanel; //CurrentModePanel
         Sprite feedTexture; //Feed
-        Sprite restartButtonTexture; //GameOverPlayAgainButton
-        Sprite gameoverFailTexture; //GameOverFailure
-        Sprite gameoverSuccessTexture; //GameOverSuccess
         
         //the point on the screen which the cannon spins around
         private Vector3 cannonFulcrum = new(400, 525, 0);
@@ -106,11 +102,8 @@ namespace Bubbel_Shot
         private void Awake()
         {
             CreateParticleSystems();
-            //Create menus
-            CreateMenu();
-            CreateNextLevelMenu();
-            //CreateGameFinishedMenu();
-            CreateMenuMouse();
+            
+            CreateMenus();
             
             //set up mice. something means they have to set up after initialised. TODO
             InitialiseMouses();
@@ -139,28 +132,10 @@ namespace Bubbel_Shot
 #endif
         }
 
-        private void CreateMenu()
+        private void CreateMenus()
         {
             menu = Instantiate(menuPrefab);
             menu.CrosslinkWithGame(this);
-        }
-
-        private void CreateNextLevelMenu()
-        {
-            var nextLevelMenuGO = new GameObject("Next Level");
-            nextLevelMenu = nextLevelMenuGO.AddComponent<ButtonMenu>();
-            nextLevelMenu.SetMenuHotkey(KeyCode.None);
-
-            //The buttons and menu texture are set after they are loaded in the load method.
-        }
-
-        private void CreateMenuMouse()
-        {
-            //todo mousey
-            /*
-            menuMouseHandler = new MouseHandler(this);
-            Components.Add(menuMouseHandler);
-            */
         }
         
         private void Start()
@@ -228,10 +203,8 @@ namespace Bubbel_Shot
             }
             else
             {
-                nextLevelMenu.SetBackground(gameoverFailTexture, 255, Color.red);
-                nextLevelMenu.ShowMenu();
+                menu.Lost();
             }
-
         }
 
         public void StartNewClassicGame()
@@ -264,7 +237,7 @@ namespace Bubbel_Shot
             sensibleColours.Add(Color.blue);
             sensibleColours.Add(new Color(0.18f, 1f, 0.91f));
             sensibleColours.Add(Color.red);
-            sensibleColours.Add(new Color(0.5f,0f,0.25f));
+            sensibleColours.Add(new Color(0.04f, 0.28f, 0.05f));
 
             availableColours = new List<Color>();
             for (int i = 0; i < settings.NumberOfDifferentBallColours && i < sensibleColours.Count; i++)
@@ -960,45 +933,46 @@ namespace Bubbel_Shot
         /// </summary>
         private void TestGameOver()
         {
+            //always wait for popping to finish
+            if (bubbelsPopping) 
+                return;
+            
+            bool gameLost = false;
+            bool gameWon = false;
+
             //if there's anything in the bottom row and it's not popping or falling
             //GAME OVER!
-            if (!bubbelsPopping && !bubbelsPopping) //TODO wtf?
+            for (int j = 0; j < playingField.GetLength(0); j++)
             {
-                bool gameLost = false;
-                bool gameWon = false;
-
-                for (int j = 0; j < playingField.GetLength(0); j++)
+                if (playingField[j, playingField.GetLength(1) - 1] != TransparentBlack)
                 {
-                    if (playingField[j, playingField.GetLength(1) - 1] != TransparentBlack)
-                    {
-                        gameLost = true;
-                    }
+                    gameLost = true;
                 }
+            }
 
-                if (gameLost)
+            if (gameLost)
+            {
+                GameOver(false);
+                return;
+            }
+
+
+
+            //if there's nothing at all, and all popping is complete
+            //SUCCESS!
+            for (int j = 0; j < playingField.GetLength(0); j++)
+            {
+                if (playingField[j, 0] != TransparentBlack)
                 {
-                    GameOver(false);
-                    return;
+                    gameWon = false;
+                    break;
                 }
+                gameWon = true;
+            }
 
-
-
-                //if there's nothing at all, and all popping is complete
-                //SUCCESS!
-                for (int j = 0; j < playingField.GetLength(0); j++)
-                {
-                    if (playingField[j, 0] != TransparentBlack)
-                    {
-                        gameWon = false;
-                        break;
-                    }
-                    gameWon = true;
-                }
-
-                if (gameWon)
-                {
-                    GameOver(true);
-                }
+            if (gameWon)
+            {
+                GameOver(true);
             }
         }
 

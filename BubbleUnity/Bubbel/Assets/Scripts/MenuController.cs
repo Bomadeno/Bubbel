@@ -12,6 +12,7 @@ namespace Bubbel_Shot
         [SerializeField] private GameObject pauseMenu;
         [SerializeField] private GameObject mainMenuAndModeSelect;
         [SerializeField] private GameObject gameWonMenu;
+        [SerializeField] private GameObject gameLostMenu;
 
 
         private Game game;
@@ -32,6 +33,7 @@ namespace Bubbel_Shot
             pauseMenu.SetActive(false);
             mainMenuAndModeSelect.SetActive(false);
             gameWonMenu.SetActive(false);
+            gameLostMenu.SetActive(false);
         }
         
         public void PauseGame()
@@ -50,9 +52,8 @@ namespace Bubbel_Shot
 
         public void GetReadyToStart()
         {
+            DeactivateAllMenus();
             inGameMenu.SetActive(true);
-            pauseMenu.SetActive(false);
-            gameWonMenu.SetActive(false);
         }
 
         public void ExitGame()
@@ -70,6 +71,13 @@ namespace Bubbel_Shot
             DeactivateAllMenus();
             
             gameWonMenu.SetActive(true);
+        }
+
+        public void Lost()
+        {
+            DeactivateAllMenus();
+            
+            gameLostMenu.SetActive(true);
         }
     }
    
