@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using MattsMenuLibrary;
-using MattsButtonLibrary;
-using ClickableMenu;
 using TMPro;
 using UnityEngine;
 
@@ -15,7 +12,6 @@ namespace Bubbel_Shot
     {
         private readonly Color TransparentBlack = new Color(0,0,0, 0);
 
-        [SerializeField] private Sprite whitePixel;
         [SerializeField] private SpriteRenderer bubbelPrefab;
 
         private List<SpriteRenderer> bubbelGridVisuals = new();
@@ -44,53 +40,53 @@ namespace Bubbel_Shot
         [SerializeField] private SpriteRenderer bubbelInCannon;
 
         [SerializeField] private MouseCursorStyleController mouseCursorControllerPrefab;
-        Sprite currentModePanel; //CurrentModePanel
-        Sprite feedTexture; //Feed
+        private Sprite currentModePanel; //CurrentModePanel
+        private Sprite feedTexture; //Feed
         
         //the point on the screen which the cannon spins around
         private Vector3 cannonFulcrum = new(400, 525, 0);
 
-        CannonData cannonData;
+        private CannonData cannonData;
         [SerializeField] private float keyboardAimSensitivity = 1f;
 
         //game flow control
-        bool onMainMenu = true;
-        bool gameRunning = false;
-        bool shotFired = false;
-        bool shotLanded = false;
-        bool bubbelsPopping = false;
-        bool bubbelsFalling = false;
-        bool needToCheckColours = false;
-        bool shotReloading = false;
+        private bool onMainMenu = true;
+        private bool gameRunning;
+        private bool shotFired;
+        private bool shotLanded;
+        private bool bubbelsPopping;
+        private bool bubbelsFalling;
+        private bool needToCheckColours;
+        private bool shotReloading;
 
         //score
-        Score score;
+        private Score score;
         [SerializeField] private TextMeshPro scoreDisplay;
 
         //Difficulty settings
-        int missedShotsAllowed;
+        private int missedShotsAllowed;
 
         //Shot data
-        Vector2 shotDirection;
-        Vector2 shotLocation;
-        float shotSpeed = 6.5f;
-        Color shotColor;
-        Point justAddedBubbel;
-        int shotReloadingStage=0;
+        private Vector2 shotDirection;
+        private Vector2 shotLocation;
+        private float shotSpeed = 6.5f;
+        private Color shotColor;
+        private Point justAddedBubbel;
+        private int shotReloadingStage;
 
         //bubbels popping and dropping
-        FallingBubbels fallingBubbels;
+        private FallingBubbels fallingBubbels;
         [SerializeField] private FallingParticleEngine fallingParticleEnginePrefab;
-        FallingParticleEngine fallingParticleEngine;
-        PoppingBubbels poppingBubbels;
+        private FallingParticleEngine fallingParticleEngine;
+        private PoppingBubbels poppingBubbels;
         [SerializeField] private PoppingParticleEngine poppingParticleEnginePrefab;
-        PoppingParticleEngine poppingParticleEngine;
+        private PoppingParticleEngine poppingParticleEngine;
 
         private int popInterval = 4;
 
         //Playing Field Data
         private List<Color> availableColours;
-        int topAlignedRight;
+        private int topAlignedRight;
         private Color[,] playingField;
 
         [SerializeField] private AudioSource generalAudioSource;
@@ -1127,7 +1123,7 @@ namespace Bubbel_Shot
 
             if (shotReloading)
             {
-                float percentageDone = (float)shotReloadingStage / 100.0f;
+                float percentageDone = shotReloadingStage / 100.0f;
                 //Fade out the bubbel quickly
                 if (shotReloadingStage < 25)
                 {
@@ -1144,7 +1140,7 @@ namespace Bubbel_Shot
                 //Slide next bubbels along
                 else
                 {
-                    float percentageSlideDone = ((float)shotReloadingStage-25.0f) / 75.0f;
+                    float percentageSlideDone = (shotReloadingStage-25.0f) / 75.0f;
                     //move balls 40 right
                     Vector2 interpVec = new Vector2(40 * (1.0f-percentageSlideDone), 0);
                     
