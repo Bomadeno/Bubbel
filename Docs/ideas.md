@@ -10,6 +10,7 @@ If you decide to do something from here, remove it from here. If you find someth
 6. Support re-theming easily - different art, sound
 7. Allow player to choose difficulty
 8. Standard "exit" dialogs (especially important for platforms without a "close" button)
-9. Refactorings
+9. Add option to adjust audio volume/mute
+10. Refactorings
    1. The cannon
    2. Bubbel falling/popping particle engines (are they even needed? each animating bubbel could be self-contained)

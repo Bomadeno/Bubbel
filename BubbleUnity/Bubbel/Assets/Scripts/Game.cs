@@ -179,6 +179,8 @@ namespace Bubbel_Shot
 
         public void PauseGame()
         {
+            //todo this is nasty, really both game and menu should subscribe to pause event, instead menu calls game...
+            menu.ShowPauseMenu();
             poppingParticleEngine.Pause();
             gameRunning = false;
         }

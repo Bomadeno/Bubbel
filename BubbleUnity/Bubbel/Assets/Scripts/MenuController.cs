@@ -35,11 +35,16 @@ namespace Bubbel_Shot
             gameWonMenu.SetActive(false);
             gameLostMenu.SetActive(false);
         }
-        
-        public void PauseGame()
+
+        public void ShowPauseMenu()
         {
             inGameMenu.SetActive(false);
             pauseMenu.SetActive(true);
+        }
+        
+        public void PauseGame()
+        {
+            ShowPauseMenu();
             game.PauseGame();
         }
 
